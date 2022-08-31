@@ -1,0 +1,50 @@
+{% extends "tools/base.html" %}
+{% block content %}
+
+    <h1> Portfolio Value </h1>
+
+    <b><a>Worst Case Total Wallet Value</a></b>
+    <p>In a worst case scenario where you had to sell everything as fast as possible the wallet would be worth about <b>{{ total_value_using_floor }}</b> Ada.</p>
+
+
+    <b><a>Best Case Total Wallet Value</a></b>
+    <p>Across a reasonable and patient timeframe selling everything in the wallet would be worth about <b>{{ total_value }}</b> Ada.</p>
+
+
+    <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">Category</th>
+            <th scope="col">Name</th>
+            <th scope="col">Value</th>
+            <th scope="col">Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            <th scope="row">Ada</th>
+            <td>Ada</td>
+            <td>{{ ada_value }}</td>
+            <td>Cardano's native token.</td>
+            </tr>
+            {% for token in token_list %}
+                <tr>
+                <th scope="row">{{ token.asset_name }}</th>
+                <td>{{ token.asset_name }}</td>
+                <td>{{ token.asset_value }}</td>
+                <td>Current price: {{ token.asset_price }}</td>
+                </tr>
+            {% endfor %}
+            {% for nft in nfts_list %}
+                <tr>
+                <th scope="row">{{ nft.collection_name }}</th>
+                <td>{{ nft.asset_name }}</td>
+                <td>{{ nft.asset_value }}</td>
+                <td>Value is based on its rarest trait of {{ nft.best_trait }}.</td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+    
+{% endblock content %}

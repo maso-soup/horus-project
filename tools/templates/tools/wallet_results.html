@@ -1,0 +1,38 @@
+{% extends "tools/base.html" %}
+{% block content %}
+
+    <h1> Contents of your Wallet </h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">Category</th>
+            <th scope="col">Name</th>
+            <th scope="col">Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            <th scope="row">Ada</th>
+            <td>Ada</td>
+            <td>Cardano's native token.</td>
+            </tr>
+            {% for token in token_list %}
+                <tr>
+                <th scope="row">{{ token.asset_name }}</th>
+                <td>{{ token.asset_name }}</td>
+                <td>{{ token.asset_quantity }} tokens</td>
+                </tr>
+            {% endfor %}
+            {% for nft in nfts_list %}
+                <tr>
+                <th scope="row">{{ nft.collection_name }}</th>
+                <td>{{ nft.asset_name }}</td>
+                <td>Rarest trait of {{ nft.best_trait }}.</td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+    
+{% endblock content %}

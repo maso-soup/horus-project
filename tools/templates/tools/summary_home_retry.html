@@ -1,0 +1,10 @@
+{% extends "tools/base.html" %}
+{% block content %}
+
+<form method="POST" action="{% url 'summary'%}">
+    {% csrf_token %}
+    <input type="text" name="addr" placeholder="Try again.">
+    <button type="submit">Submit</button>
+</form>
+
+{% endblock content %}
