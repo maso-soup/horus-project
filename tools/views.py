@@ -57,7 +57,7 @@ def fetch_ada_value( valid_stake_address ):
     if valid_stake_address == "" :
         return ada_value
 
-    ada_value = float( api.accounts( stake_address=valid_stake_address, return_type='json' )[ "controlled_amount" ] ) / 1000000
+    ada_value = float( api.accounts( valid_stake_address, return_type='json' )[ "controlled_amount" ] ) / 1000000
     return ada_value
 
 def fetch_token_values( valid_stake_address ):
@@ -92,7 +92,7 @@ def fetch_token_values( valid_stake_address ):
             token_dict[ "asset_name" ] = asset_name
             token_dict[ "asset_price" ] = round( token_price, 2 )
             token_dict[ "asset_quantity" ] = token_quantity
-            token_dict[ "asset_value" ] = token_price * float( token_quantity ) / 1000000
+            token_dict[ "asset_value" ] = round( token_price * float( token_quantity ) / 1000000, 2 )
 
             token_list.append( token_dict )
 
@@ -233,7 +233,7 @@ def prepare_context( valid_address ):
     nfts_list_value = round( sum_asset_values( nfts_list ), 2 )
     nfts_list_value_floor = round( sum_asset_values_floor( nfts_list ), 2 )
 
-    total_value = ada_value + token_list_value + nfts_list_value
+    total_value = round( ada_value + token_list_value + nfts_list_value, 2)
     total_value_using_floor = round( ada_value + token_list_value + nfts_list_value_floor, 2 )
 
     context = {

@@ -1,5 +1,5 @@
 {% extends "tools/base.html" %}
-{% block content %}
+{% block search %}
 
 <form method="POST" action="{% url 'portfolio'%}">
     {% csrf_token %}
@@ -7,4 +7,4 @@
     <button type="submit">Submit</button>
 </form>
 
-{% endblock content %}
+{% endblock search %}
