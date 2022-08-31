@@ -1,14 +1,14 @@
 {% extends "tools/base.html" %}
 {% block content %}
 
-    <h1> Portfolio Value </h1>
+    <h1> Staking Rewards </h1>
 
-    <b><a>Worst Case Total Wallet Value</a></b>
-    <p>In a worst case scenario where you had to sell everything as fast as possible the wallet would be worth about <b>{{ total_value_using_floor }}</b> Ada.</p>
+    <b><a>Lifetime Rewards</a></b>
+    <p>You have earned <b>{{ total_value_using_floor }}</b> Ada over this wallet's lifetime.</p>
 
 
-    <b><a>Best Case Total Wallet Value</a></b>
-    <p>Across a reasonable and patient timeframe selling everything in the wallet would be worth about <b>{{ total_value }}</b> Ada.</p>
+    <b><a>30 Day Rewards</a></b>
+    <p>You have earned <b>{{ total_value }}</b> Ada in the past 30 days.</p>
 
 
     <table class="table">
