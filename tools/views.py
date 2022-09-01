@@ -7,6 +7,8 @@ import requests
 from blockfrost import ApiError, ApiUrls, BlockFrostApi
 from django.shortcuts import render
 
+import json
+
 #BlockFrost API which allows for querying the Cardano blockchain
 api = BlockFrostApi(
     project_id='mainnetJZdBd2lCOXfHSI9ENhubJYAZ5ThYpXao',
@@ -59,6 +61,45 @@ def fetch_ada_value( valid_stake_address ):
 
     ada_value = float( api.accounts( valid_stake_address, return_type='json' )[ "controlled_amount" ] ) / 1000000
     return ada_value
+
+def fetch_api_rewards_data( valid_stake_address ):
+    '''Function for fetching amount of Rewards and Reward
+    info in the wallet of a given valid address'''
+    rewards_dict = {}
+
+    if valid_stake_address == "" :
+        return rewards_dict
+
+    api_rewards_data = api.accounts( valid_stake_address, return_type='json' )
+
+    total_rewards = float( api_rewards_data[ "rewards_sum" ] ) / 1000000
+    total_withdrawals = float( api_rewards_data[ "rewards_sum" ] ) / 1000000
+    total_withdrawable = float( api_rewards_data[ "rewards_sum" ] ) / 1000000
+
+    rewards_dict[ "total_rewards" ] = total_rewards
+    rewards_dict[ "total_withdrawals" ] = total_withdrawals
+    rewards_dict[ "total_withdrawable" ] = total_withdrawable
+
+    pool_id = api_rewards_data[ "pool_id" ]
+
+    pool_ticker = api.pool_metadata( pool_id, return_type='json' )[ "ticker" ]
+    pool_name = api.pool_metadata( pool_id, return_type='json' )[ "name" ]
+
+    rewards_dict[ "pool_ticker" ] = pool_ticker
+    rewards_dict[ "pool_name" ] = pool_name
+
+    rewards_dict_list_month = api.account_rewards( valid_stake_address, order='desc', return_type='json' )
+    rewards_list_month = list(rewards_dict_list_month)[0:5]
+    print(rewards_list_month)
+
+    rewards_month = 0
+
+    for reward in rewards_list_month:
+        rewards_month = rewards_month + ( float( reward[ 'amount' ] ) / 1000000 )
+
+    rewards_dict[ "total_last_month" ] = rewards_month
+
+    return rewards_dict
 
 def fetch_token_values( valid_stake_address ):
     '''Function for fetching the Ada value of every token in the wallet of a given
@@ -152,7 +193,7 @@ def nft_request( url, asset_id ):
 
     trait_floors_dict_values = list(filter(None, (trait_floors_dict.values())))
     best_trait_floor = 0
-    best_trait = ""
+    best_trait = "nothing"
 
     for trait in trait_floors_dict_values:
         trait_val = list(trait.values())[0]
@@ -222,8 +263,25 @@ def sum_asset_values_floor( assets_list ):
 
     return total_value
 
-def prepare_context( valid_address ):
-    '''Prepares the values to be rendedered in view functions'''
+def portfolio( request, addr = None ):
+    '''Function to render the contents of the entered
+    wallet address and the calculated values of the contained assets'''
+
+    address = ""
+
+    if request.method == 'GET' and not addr :
+        return render( request, 'tools/portfolio_home.html' )
+
+    if request.method == 'GET' and addr :
+        address = addr
+
+    if request.method == 'POST' :
+        address = request.POST.get('addr', None)
+
+    valid_address = validate_address( address )
+
+    if not valid_address :
+        return render( request, 'tools/portfolio_home_retry.html' )
 
     token_list = fetch_token_values( valid_address )
     nfts_list = fetch_nft_values( valid_address )
@@ -247,30 +305,6 @@ def prepare_context( valid_address ):
         'ada_value' : ada_value,
     }
 
-    return context
-
-def portfolio( request, addr = None ):
-    '''Function to render the contents of the entered
-    wallet address and the calculated values of the contained assets'''
-
-    address = ""
-
-    if request.method == 'GET' and not addr :
-        return render( request, 'tools/portfolio_home.html' )
-
-    if request.method == 'GET' and addr :
-        address = addr
-
-    if request.method == 'POST' :
-        address = request.POST.get('addr', None)
-
-    valid_address = validate_address( address )
-
-    if not valid_address :
-        return render( request, 'tools/portfolio_home_retry.html' )
-
-    context = prepare_context( valid_address )
-
     return render( request, 'tools/portfolio_results.html', context )
 
 def summary( request, addr = None ):
@@ -293,7 +327,42 @@ def summary( request, addr = None ):
     if not valid_address :
         return render( request, 'tools/summary_home_retry.html' )
 
-    context = prepare_context( valid_address )
+    token_list = fetch_token_values( valid_address )
+    nfts_list = fetch_nft_values( valid_address )
+    ada_value = round( fetch_ada_value( valid_address ), 2)
+
+    token_list_value = round( sum_asset_values( token_list ), 2 )
+    nfts_list_value = round( sum_asset_values( nfts_list ), 2 )
+    nfts_list_value_floor = round( sum_asset_values_floor( nfts_list ), 2 )
+
+    total_value = round( ada_value + token_list_value + nfts_list_value, 2)
+    total_value_using_floor = round( ada_value + token_list_value + nfts_list_value_floor, 2 )
+
+    rewards_dict = fetch_api_rewards_data( valid_address )
+
+    total_rewards = round( rewards_dict[ "total_rewards" ], 2)
+    total_withdrawals = round( rewards_dict[ "total_withdrawals" ], 2)
+    total_withdrawable = round( rewards_dict[ "total_withdrawable" ], 2)
+    pool_name = rewards_dict[ "pool_name" ]
+    pool_ticker = rewards_dict[ "pool_ticker" ]
+    total_last_month = round( rewards_dict[ "total_last_month" ], 2)
+
+    context = {
+        'token_list' : token_list,
+        'nfts_list' : nfts_list,
+        'total_value' : total_value,
+        'total_value_using_floor' : total_value_using_floor,
+        'token_list_value' : token_list_value,
+        'nfts_list_value_floor' : nfts_list_value_floor,
+        'nfts_list_value' : nfts_list_value,
+        'ada_value' : ada_value,
+        'total_rewards' : total_rewards,
+        'total_withdrawals' : total_withdrawals,
+        'total_withdrawable' : total_withdrawable,
+        'pool_name' : pool_name,
+        'pool_ticker' : pool_ticker,
+        'total_last_month' : total_last_month,
+    }
 
     return render( request, 'tools/summary_results.html', context )
 
@@ -317,13 +386,21 @@ def wallet( request, addr = None ):
     if not valid_address :
         return render( request, 'tools/wallet_home_retry.html' )
 
-    context = prepare_context( valid_address )
+    token_list = fetch_token_values( valid_address )
+    nfts_list = fetch_nft_values( valid_address )
+    ada_value = round( fetch_ada_value( valid_address ), 2)
+
+    context = {
+        'token_list' : token_list,
+        'nfts_list' : nfts_list,
+        'ada_value' : ada_value,
+    }
 
     return render( request, 'tools/wallet_results.html', context )
 
 def staking( request, addr = None ):
-    '''Function to render the contents of the entered
-    wallet address and the calculated values of the contained assets'''
+    '''Function to render the staking details of the entered
+    wallet address'''
 
     address = ""
 
@@ -341,7 +418,25 @@ def staking( request, addr = None ):
     if not valid_address :
         return render( request, 'tools/staking_home_retry.html' )
 
-    context = prepare_context( valid_address )
+    rewards_dict = fetch_api_rewards_data( valid_address )
+    ada_value = round( fetch_ada_value( valid_address ), 2)
+
+    total_rewards = round( rewards_dict[ "total_rewards" ], 2)
+    total_withdrawals = round( rewards_dict[ "total_withdrawals" ], 2)
+    total_withdrawable = round( rewards_dict[ "total_withdrawable" ], 2)
+    pool_name = rewards_dict[ "pool_name" ]
+    pool_ticker = rewards_dict[ "pool_ticker" ]
+    total_last_month = round( rewards_dict[ "total_last_month" ], 2)
+
+    context = {
+        'total_rewards' : total_rewards,
+        'total_withdrawals' : total_withdrawals,
+        'total_withdrawable' : total_withdrawable,
+        'pool_name' : pool_name,
+        'pool_ticker' : pool_ticker,
+        'total_last_month' : total_last_month,
+        'ada_value' : ada_value,
+    }
 
     return render( request, 'tools/staking_results.html', context )
     

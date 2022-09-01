@@ -1,50 +1,55 @@
 {% extends "tools/base.html" %}
 {% block content %}
 
-    <h1> Portfolio Value </h1>
+    <h1 class="pb-3"> Portfolio Value </h1>
 
-    <b><a>Worst Case Scenario</a></b>
-    <p>If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor }}</b> Ada.</p>
+    <div class="row">
+        <div class="col">
+            <b><a>Conservative Portfolio Value</a></b>
+            <p>If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor }}</b> Ada.</p>
+        </div>
+        <div class="col">
+            <b><a>Possible Portfolio Value</a></b>
+            <p>If you had time and were able to get sales based on rarity you could get around <b>{{ total_value }}</b> Ada.</p>
+        </div>
+    </div>
 
-
-    <b><a>Best Case Scenario</a></b>
-    <p>If you had time and were able to get sales based on rarity you could get around <b>{{ total_value }}</b> Ada.</p>
-
-
-    <table class="table">
-        <thead>
-            <tr>
-            <th scope="col">Category</th>
-            <th scope="col">Name</th>
-            <th scope="col">Value</th>
-            <th scope="col">Detail</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-            <th scope="row">Ada</th>
-            <td>Ada</td>
-            <td>{{ ada_value }}</td>
-            <td>Cardano's native token.</td>
-            </tr>
-            {% for token in token_list %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
                 <tr>
-                <th scope="row">{{ token.asset_name }}</th>
-                <td>{{ token.asset_name }}</td>
-                <td>{{ token.asset_value }}</td>
-                <td>Current price: {{ token.asset_price }}</td>
+                <th scope="col">Category</th>
+                <th scope="col">Name</th>
+                <th scope="col">Value</th>
+                <th scope="col">Detail</th>
                 </tr>
-            {% endfor %}
-            {% for nft in nfts_list %}
+            </thead>
+            <tbody>
                 <tr>
-                <th scope="row">{{ nft.collection_name }}</th>
-                <td>{{ nft.asset_name }}</td>
-                <td>{{ nft.asset_value }}</td>
-                <td>Value is based on its rarest trait of {{ nft.best_trait }}.</td>
+                <th scope="row">Ada</th>
+                <td>Ada</td>
+                <td>{{ ada_value }}</td>
+                <td>Cardano's native token.</td>
                 </tr>
-            {% endfor %}
+                {% for token in token_list %}
+                    <tr>
+                    <th scope="row">{{ token.asset_name }}</th>
+                    <td>{{ token.asset_name }}</td>
+                    <td>{{ token.asset_value }}</td>
+                    <td>Current price: {{ token.asset_price }}</td>
+                    </tr>
+                {% endfor %}
+                {% for nft in nfts_list %}
+                    <tr>
+                    <th scope="row">{{ nft.collection_name }}</th>
+                    <td>{{ nft.asset_name }}</td>
+                    <td>{{ nft.asset_value }}</td>
+                    <td>Rarest trait is {{ nft.best_trait }}.</td>
+                    </tr>
+                {% endfor %}
 
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
     
 {% endblock content %}

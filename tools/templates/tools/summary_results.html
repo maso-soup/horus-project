@@ -1,16 +1,37 @@
 {% extends "tools/base.html" %}
 {% block content %}
 
-    <h1> Staking Rewards </h1>
+<h1 class="pb-3"> Summary  </h1>
 
-    <b><a>Lifetime Rewards</a></b>
-    <p>You have earned <b>{{ total_value_using_floor }}</b> Ada over this wallet's lifetime.</p>
+<div class="container pb-3">
+    <div class="row">
+        <div class="col">
+            <b><a>Lifetime Staking Rewards</a></b>
+            <p>You have earned <b>{{ total_value_using_floor }}</b> Ada over this wallet's lifetime.</p>
+        </div>
+        <div class="col">
+            <b><a>30 Day Staking Rewards</a></b>
+            <p>You have earned <b>{{ total_value }}</b> Ada in the past 30 days.</p>
+        </div>
+        <div class="col">
+            <b><a>Stake Pool</a></b>
+            <p>You are currently staking <b>{{ ada_value }}</b> Ada with {{ pool_name }} [{{ pool_ticker }}].</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <b><a>Conservative Portfolio Value</a></b>
+            <p>If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor }}</b> Ada.</p>
+        </div>
+        <div class="col">
+            <b><a>Possible Portfolio Value</a></b>
+            <p>If you had time and were able to get sales based on rarity you could get around <b>{{ total_value }}</b> Ada.</p>
+        </div>
+    </div>
 
+</div>
 
-    <b><a>30 Day Rewards</a></b>
-    <p>You have earned <b>{{ total_value }}</b> Ada in the past 30 days.</p>
-
-
+<div class="table-responsive">
     <table class="table">
         <thead>
             <tr>
@@ -40,11 +61,12 @@
                 <th scope="row">{{ nft.collection_name }}</th>
                 <td>{{ nft.asset_name }}</td>
                 <td>{{ nft.asset_value }}</td>
-                <td>Value is based on its rarest trait of {{ nft.best_trait }}.</td>
+                <td>Rarest trait is {{ nft.best_trait }}.</td>
                 </tr>
             {% endfor %}
 
         </tbody>
     </table>
+</div>
     
 {% endblock content %}

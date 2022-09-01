@@ -8,10 +8,6 @@ input[type="text"] {
     height: 40px;
 }
 
-button[type="submit"] {
-    height: 40px;
-}
-
 .navbar {
     background: #0047b8
 }
