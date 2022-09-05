@@ -1,4 +1,5 @@
 {% extends "tools/base.html" %}
+{% load humanize %}
 {% block content %}
 
     <h1 class="pb-3"> Portfolio Value </h1>
@@ -28,22 +29,22 @@
                 <tr>
                 <th scope="row">Ada</th>
                 <td>Ada</td>
-                <td>{{ ada_value }}</td>
+                <td>{{ ada_value  | intcomma  }}</td>
                 <td>Cardano's native token.</td>
                 </tr>
                 {% for token in token_list %}
                     <tr>
                     <th scope="row">{{ token.asset_name }}</th>
                     <td>{{ token.asset_name }}</td>
-                    <td>{{ token.asset_value }}</td>
-                    <td>Current price: {{ token.asset_price }}</td>
+                    <td>{{ token.asset_value | intcomma  }}</td>
+                    <td>Current price: {{ token.asset_price | intcomma  }}</td>
                     </tr>
                 {% endfor %}
                 {% for nft in nfts_list %}
                     <tr>
                     <th scope="row">{{ nft.collection_name }}</th>
                     <td>{{ nft.asset_name }}</td>
-                    <td>{{ nft.asset_value }}</td>
+                    <td>{{ nft.asset_value | intcomma   }}</td>
                     <td>Rarest trait is {{ nft.best_trait }}.</td>
                     </tr>
                 {% endfor %}

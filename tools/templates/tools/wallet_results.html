@@ -1,38 +1,33 @@
 {% extends "tools/base.html" %}
+{% load humanize %}
 {% block content %}
 
-    <h1 class="pb-3"> Wallet Contents </h1>
+    <h1> Wallet Contents </h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-            <th scope="col">Category</th>
-            <th scope="col">Name</th>
-            <th scope="col">Detail</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-            <th scope="row">Ada</th>
-            <td>Ada</td>
-            <td>Cardano's native token.</td>
-            </tr>
+
+    <div class="container p-3">
+        <div class="row">
+            <div class="col-12">
+                <b><a>Ada</a></b>
+                <p>{{ ada_value | intcomma }} tokens</p>
+            </div>
+
             {% for token in token_list %}
-                <tr>
-                <th scope="row">{{ token.asset_name }}</th>
-                <td>{{ token.asset_name }}</td>
-                <td>{{ token.asset_quantity }} tokens</td>
-                </tr>
-            {% endfor %}
-            {% for nft in nfts_list %}
-                <tr>
-                <th scope="row">{{ nft.collection_name }}</th>
-                <td>{{ nft.asset_name }}</td>
-                <td>Rarest trait of {{ nft.best_trait }}.</td>
-                </tr>
+                <div class="col-3">
+                    <img src="{{ token.asset_img_link }}" class="img-fluid img-thumbnail" alt="img">
+                    <b><a>{{ token.asset_name }}</a></b>
+                    <p>{{ token.asset_quantity | intcomma  }} tokens</p>
+                </div>
             {% endfor %}
 
-        </tbody>
-    </table>
+            {% for nft in nfts_list %}
+                <div class="col-3">
+                    <img src="{{ nft.asset_img_link }}" class="img-fluid img-thumbnail" alt="img">
+                    <b><a>{{ nft.collection_name }}</a></b>
+                    <p>{{ nft.asset_name }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
     
 {% endblock content %}

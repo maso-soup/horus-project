@@ -1,4 +1,5 @@
 {% extends "tools/base.html" %}
+{% load humanize %}
 {% block content %}
 
 <h1 class="pb-3"> Summary  </h1>
@@ -7,25 +8,25 @@
     <div class="row">
         <div class="col">
             <b><a>Lifetime Staking Rewards</a></b>
-            <p>You have earned <b>{{ total_rewards }}</b> Ada over this wallet's lifetime with <b>{{ total_withdrawable }}</b> currently available for withdrawal.</p>
+            <p>You have earned <b>{{ total_rewards | intcomma }}</b> Ada over this wallet's lifetime with <b>{{ total_withdrawable | intcomma }}</b> currently available for withdrawal.</p>
         </div>
         <div class="col">
             <b><a>30 Day Staking Rewards</a></b>
-            <p>You have earned <b>{{ total_last_month }}</b> Ada in the past 30 days.</p>
+            <p>You have earned <b>{{ total_last_month | intcomma }}</b> Ada in the past 30 days.</p>
         </div>
         <div class="col">
             <b><a>Stake Pool</a></b>
-            <p>You are currently staking <b>{{ ada_value }}</b> Ada with {{ pool_name }} [{{ pool_ticker }}].</p>
+            <p>You are currently staking <b>{{ ada_value | intcomma  }}</b> Ada with {{ pool_name }} [{{ pool_ticker }}].</p>
         </div>
     </div>
     <div class="row">
         <div class="col">
             <b><a>Conservative Portfolio Value</a></b>
-            <p>If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor }}</b> Ada.</p>
+            <p>If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor | intcomma  }}</b> Ada.</p>
         </div>
         <div class="col">
             <b><a>Possible Portfolio Value</a></b>
-            <p>If you had time and were able to get sales based on rarity you could get around <b>{{ total_value }}</b> Ada.</p>
+            <p>If you had time and were able to get sales based on rarity you could get around <b>{{ total_value | intcomma  }}</b> Ada.</p>
         </div>
     </div>
 
@@ -37,7 +38,7 @@
             <tr>
             <th scope="col">Category</th>
             <th scope="col">Name</th>
-            <th scope="col">Value</th>
+            <th scope="col">Value (ADA)</th>
             <th scope="col">Detail</th>
             </tr>
         </thead>
@@ -52,15 +53,15 @@
                 <tr>
                 <th scope="row">{{ token.asset_name }}</th>
                 <td>{{ token.asset_name }}</td>
-                <td>{{ token.asset_value }}</td>
-                <td>Current price: {{ token.asset_price }}</td>
+                <td>{{ token.asset_value | intcomma  }}</td>
+                <td>Current price: {{ token.asset_price | intcomma  }}</td>
                 </tr>
             {% endfor %}
             {% for nft in nfts_list %}
                 <tr>
                 <th scope="row">{{ nft.collection_name }}</th>
                 <td>{{ nft.asset_name }}</td>
-                <td>{{ nft.asset_value }}</td>
+                <td>{{ nft.asset_value | intcomma  }}</td>
                 <td>Rarest trait is {{ nft.best_trait }}.</td>
                 </tr>
             {% endfor %}

@@ -22,6 +22,7 @@ HANDLE_RARITIES = { "Legendary": 995, "Ultra Rare": 445, "Rare": 445, "Common": 
 
 CNFTJUNGLE_API_URL = "https://api.cnftjungle.app/assets/asset-info/"
 MINSWAP_API_URL = "https://api-mainnet-prod.minswap.org/coinmarketcap/v2/pairs"
+IPFS_API_URL = "https://ipfs.io/ipfs/"
 
 def validate_address( input_address ):
     '''Function for validating the user input address. Input not matching any
@@ -51,8 +52,8 @@ def validate_address( input_address ):
 
     return ""
 
-def fetch_ada_value( valid_stake_address ):
-    '''Function for fetching amount of Ada in the wallet of a given valid address'''
+def get_ada_value( valid_stake_address ):
+    '''Function for geting amount of Ada in the wallet of a given valid address'''
     ada_value = 0
 
     #If validStakeAddress is empty, it was invalidated by validateAddress function.
@@ -62,8 +63,8 @@ def fetch_ada_value( valid_stake_address ):
     ada_value = float( api.accounts( valid_stake_address, return_type='json' )[ "controlled_amount" ] ) / 1000000
     return ada_value
 
-def fetch_api_rewards_data( valid_stake_address ):
-    '''Function for fetching amount of Rewards and Reward
+def get_api_rewards_data( valid_stake_address ):
+    '''Function for geting amount of Rewards and Reward
     info in the wallet of a given valid address'''
     rewards_dict = {}
 
@@ -84,13 +85,14 @@ def fetch_api_rewards_data( valid_stake_address ):
 
     pool_ticker = api.pool_metadata( pool_id, return_type='json' )[ "ticker" ]
     pool_name = api.pool_metadata( pool_id, return_type='json' )[ "name" ]
+    pool_homepage = api.pool_metadata( pool_id, return_type='json' )[ "homepage" ]
 
     rewards_dict[ "pool_ticker" ] = pool_ticker
     rewards_dict[ "pool_name" ] = pool_name
+    rewards_dict[ "pool_homepage" ] = pool_homepage
 
     rewards_dict_list_month = api.account_rewards( valid_stake_address, order='desc', return_type='json' )
-    rewards_list_month = list(rewards_dict_list_month)[0:5]
-    print(rewards_list_month)
+    rewards_list_month = list(rewards_dict_list_month)[0:6]
 
     rewards_month = 0
 
@@ -101,36 +103,128 @@ def fetch_api_rewards_data( valid_stake_address ):
 
     return rewards_dict
 
-def fetch_token_values( valid_stake_address ):
-    '''Function for fetching the Ada value of every token in the wallet of a given
+def get_asset_details( valid_stake_address ):
+    '''Get asset details and return list'''
+
+    asset_list_output = []
+
+    if valid_stake_address == "" :
+        return asset_list_output
+
+    asset_list = api.account_addresses_assets( valid_stake_address, return_type='json' )
+
+    for asset in asset_list:
+        asset_id = asset[ 'unit' ]
+        asset_dict = {}
+
+        asset_details = api.asset( asset_id, return_type='json' )
+        asset_onchain_metadata = asset_details[ 'onchain_metadata' ]
+        asset_metadata = asset_details[ 'metadata' ]
+        asset_quantity = asset[ 'quantity' ]
+        asset_img_link = ""
+        asset_decimals = ""
+        asset_ticker = ""
+        asset_url = ""
+        asset_logo = ""
+        asset_name = ""
+
+        try:
+            asset_name = bytes.fromhex( asset_id[56:] ).decode( 'utf-8' )
+
+        except UnicodeDecodeError:
+            asset_name = bytes.fromhex( asset_id[56:] )
+            print("UnicodeDecodeError")
+
+        if asset_onchain_metadata :
+            print("On Chain: ")
+            print(asset_onchain_metadata)
+
+            try:
+                metadata_image = asset_onchain_metadata[ 'image' ]
+                ipfs_id = metadata_image.partition( '//' )[-1]
+                asset_img_link = f'{ IPFS_API_URL }{ ipfs_id }'
+
+            except AttributeError:
+                print("AttributeError " + asset_id )
+            
+            except KeyError:
+                print("AttributeError " + asset_id )
+
+            try:
+                asset_name = asset_onchain_metadata[ 'name' ]
+                
+            except AttributeError:
+                print("AttributeError " + asset_id )
+            
+            except KeyError:
+                print("AttributeError " + asset_id )
+
+        if asset_metadata :
+            print("Metadata: ")
+            print(asset_metadata)
+
+            try:
+                asset_name = asset_metadata[ 'name' ]
+
+            except AttributeError:
+                print("AttributeError " + asset_id )
+            
+            except KeyError:
+                print("AttributeError " + asset_id )
+
+            try:
+                asset_decimals = asset_metadata[ 'decimals' ]
+                asset_ticker = asset_metadata[ 'ticker' ]
+                asset_url = asset_metadata[ 'url' ]
+                #asset_logo = asset_metadata[ 'logo' ]
+                asset_logo = ""
+
+            except AttributeError:
+                print("AttributeError " + asset_id )
+            
+            except KeyError:
+                print("AttributeError " + asset_id )
+
+
+        asset_dict["asset_id"] = asset_id
+        asset_dict["asset_name"] = asset_name
+        asset_dict["asset_img_link"] = asset_img_link
+        asset_dict["asset_decimals"] = asset_decimals
+        asset_dict["asset_ticker"] = asset_ticker
+        asset_dict["asset_url"] = asset_url
+        asset_dict["asset_logo"] = asset_logo
+        asset_dict["asset_quantity"] = asset_quantity
+
+        asset_list_output.append( asset_dict )
+
+    return asset_list_output
+
+def get_token_values( valid_asset_list ):
+    '''Function for geting the Ada value of every token in the wallet of a given
     valid address. Price data provided by MinSwap'''
 
     token_list = []
 
-    #If validStakeAddress is empty, it was invalidated by validate_address function.
-    if valid_stake_address == "" :
-        return token_list
-
-    asset_list = api.account_addresses_assets( valid_stake_address, return_type='json' )
-
-    #Using minswap.org API for token prices
     response = requests.get( MINSWAP_API_URL )
 
     if response.status_code != 200 :
         return token_list
 
-    for asset in asset_list:
-        asset_id = asset["unit"]
-        asset_name = bytes.fromhex( asset_id[56:] ).decode( 'utf-8' )
+    for asset in valid_asset_list:
+        asset_id = asset[ "asset_id" ]
+        token_dict = {}
 
         try:
-            token_dict = {}
-
             token_pair_info = response.json()[ asset_id + "_lovelace" ]
             token_price = float( token_pair_info[ "last_price" ] )
-            token_quantity = asset[ "quantity" ]
+            token_quantity = asset[ "asset_quantity" ]
 
-            token_dict[ "asset_name" ] = asset_name
+            token_dict[ "asset_name" ] = asset[ 'asset_name' ]
+            token_dict[ "asset_img_link" ] = asset[ 'asset_img_link' ]
+            token_dict[ "asset_decimals" ] = asset[ 'asset_decimals' ]
+            token_dict[ "asset_ticker" ] = asset[ 'asset_ticker' ]
+            token_dict[ "asset_url" ] = asset[ 'asset_url' ]
+            token_dict[ "asset_logo" ] = asset[ 'asset_logo' ]
             token_dict[ "asset_price" ] = round( token_price, 2 )
             token_dict[ "asset_quantity" ] = token_quantity
             token_dict[ "asset_value" ] = round( token_price * float( token_quantity ) / 1000000, 2 )
@@ -142,17 +236,26 @@ def fetch_token_values( valid_stake_address ):
 
     return token_list
 
-def nft_request( url, asset_id ):
+def nft_request( url, asset ):
     '''Helper function to allow for easy implementation of
-    multithreading of slow API fetches for NFT data gathering'''
+    multithreading of slow API getes for NFT data gathering'''
 
-    policy_id = asset_id[0:56]
-    asset_name = bytes.fromhex( asset_id[56:] ).decode( 'utf-8' )
+    asset_id = asset[ 'asset_id' ]
+
     nft_dict = {}
+    policy_id = asset_id[ 0:56 ]
+
+    asset_name = asset[ 'asset_name' ]
+
+    nft_dict[ "asset_img_link" ] = asset[ 'asset_img_link' ]
+    nft_dict[ "asset_decimals" ] = asset[ 'asset_decimals' ]
+    nft_dict[ "asset_ticker" ] = asset[ 'asset_ticker' ]
+    nft_dict[ "asset_url" ] = asset[ 'asset_url' ]
+    nft_dict[ "asset_logo" ] = asset[ 'asset_logo' ]
 
     if policy_id == HANDLE_POLICY_ID :
         nft_dict[ "asset_name" ] = asset_name
-        nft_dict[ "asset_value_floor" ] = 7
+        nft_dict[ "asset_value_floor" ] = 7.00
         nft_dict[ "collection_name" ] = "Ada Handle"
         nft_dict[ "best_trait" ] = "Error"
         nft_dict[ "asset_value" ] = -1
@@ -163,19 +266,19 @@ def nft_request( url, asset_id ):
 
         elif len( asset_name ) < 3 :
             nft_dict[ "best_trait" ] = "Ultra Rare"
-            nft_dict[ "asset_value" ] = 995
+            nft_dict[ "asset_value" ] = 995.00
 
         elif len( asset_name ) < 4 :
             nft_dict[ "best_trait" ] = "Rare"
-            nft_dict[ "asset_value" ] = 445
+            nft_dict[ "asset_value" ] = 445.00
 
         elif len( asset_name ) < 8 :
             nft_dict[ "best_trait" ] = "Common"
-            nft_dict[ "asset_value" ] = 80
+            nft_dict[ "asset_value" ] = 80.00
 
         elif len( asset_name ) < 16 :
             nft_dict[ "best_trait" ] = "Basic"
-            nft_dict[ "asset_value" ] = 15
+            nft_dict[ "asset_value" ] = 15.00
 
         return nft_dict
 
@@ -203,38 +306,40 @@ def nft_request( url, asset_id ):
             best_trait_floor = trait_val
             best_trait = trait_key
 
-    nft_dict[ "asset_name" ] = asset_name
     nft_dict[ "asset_value" ] = float( best_trait_floor )
     nft_dict[ "asset_value_floor" ] = float( absolute_floor )
     nft_dict[ "best_trait" ] = best_trait
     nft_dict[ "collection_name" ] = collection_name
 
+    nft_dict[ "asset_name" ] = asset_name
+    nft_dict[ "asset_img_link" ] = asset[ 'asset_img_link' ]
+    nft_dict[ "asset_decimals" ] = asset[ 'asset_decimals' ]
+    nft_dict[ "asset_ticker" ] = asset[ 'asset_ticker' ]
+    nft_dict[ "asset_url" ] = asset[ 'asset_url' ]
+    nft_dict[ "asset_logo" ] = asset[ 'asset_logo' ]
+
     return nft_dict
 
-def fetch_nft_values( valid_stake_address ):
-    '''Function for fetching the Ada value of every NFT in the
+def get_nft_values( valid_asset_list ):
+    '''Function for geting the Ada value of every NFT in the
     wallet of a given valid address. Uses data from CNFTJungle'''
 
     nfts_list = []
     threads= []
 
-    #If validStakeAddress is empty, it was invalidated by validateAddress function.
-    if valid_stake_address == "" :
-        return nfts_list
-
     #Initializing the list of assets contained in the account, as well as the total controlled
     #amount of Ada which includes Ada in all addresses as well as rewards yet to be redeemed
-    asset_list = api.account_addresses_assets( valid_stake_address, return_type='json' )
 
     with ThreadPoolExecutor( max_workers=20 ) as executor:
-        for asset in asset_list:
-            asset_id = asset["unit"]
+        for asset in valid_asset_list:
+            asset_id = asset[ "asset_id" ]
             url = CNFTJUNGLE_API_URL + asset_id
 
-            threads.append( executor.submit( nft_request, url, asset_id ) )
+            threads.append( executor.submit( nft_request, url, asset ) )
 
         for task in as_completed( threads ):
             nft_dict = task.result()
+            #does not show items worth zero, convenience right now, fix in future for wallet vs portfolio display
             if nft_dict and nft_dict[ 'asset_value' ] :
                 nfts_list.append( nft_dict )
 
@@ -246,8 +351,6 @@ def sum_asset_values( assets_list ):
     total_value = 0
 
     for asset in assets_list:
-        print(asset)
-        print(asset["asset_value"])
         total_value = total_value + asset[ "asset_value" ]
 
     return total_value
@@ -283,9 +386,9 @@ def portfolio( request, addr = None ):
     if not valid_address :
         return render( request, 'tools/portfolio_home_retry.html' )
 
-    token_list = fetch_token_values( valid_address )
-    nfts_list = fetch_nft_values( valid_address )
-    ada_value = round( fetch_ada_value( valid_address ), 2)
+    token_list = get_token_values( valid_address )
+    nfts_list = get_nft_values( valid_address )
+    ada_value = round( get_ada_value( valid_address ), 2)
 
     token_list_value = round( sum_asset_values( token_list ), 2 )
     nfts_list_value = round( sum_asset_values( nfts_list ), 2 )
@@ -327,9 +430,9 @@ def summary( request, addr = None ):
     if not valid_address :
         return render( request, 'tools/summary_home_retry.html' )
 
-    token_list = fetch_token_values( valid_address )
-    nfts_list = fetch_nft_values( valid_address )
-    ada_value = round( fetch_ada_value( valid_address ), 2)
+    token_list = get_token_values( valid_address )
+    nfts_list = get_nft_values( valid_address )
+    ada_value = round( get_ada_value( valid_address ), 2)
 
     token_list_value = round( sum_asset_values( token_list ), 2 )
     nfts_list_value = round( sum_asset_values( nfts_list ), 2 )
@@ -338,7 +441,7 @@ def summary( request, addr = None ):
     total_value = round( ada_value + token_list_value + nfts_list_value, 2)
     total_value_using_floor = round( ada_value + token_list_value + nfts_list_value_floor, 2 )
 
-    rewards_dict = fetch_api_rewards_data( valid_address )
+    rewards_dict = get_api_rewards_data( valid_address )
 
     total_rewards = round( rewards_dict[ "total_rewards" ], 2)
     total_withdrawals = round( rewards_dict[ "total_withdrawals" ], 2)
@@ -386,9 +489,13 @@ def wallet( request, addr = None ):
     if not valid_address :
         return render( request, 'tools/wallet_home_retry.html' )
 
-    token_list = fetch_token_values( valid_address )
-    nfts_list = fetch_nft_values( valid_address )
-    ada_value = round( fetch_ada_value( valid_address ), 2)
+    asset_detail_list = get_asset_details( valid_address )
+
+    token_list = get_token_values( asset_detail_list )
+
+    nfts_list = get_nft_values( asset_detail_list )
+
+    ada_value = round( get_ada_value( valid_address ), 2)
 
     context = {
         'token_list' : token_list,
@@ -418,8 +525,8 @@ def staking( request, addr = None ):
     if not valid_address :
         return render( request, 'tools/staking_home_retry.html' )
 
-    rewards_dict = fetch_api_rewards_data( valid_address )
-    ada_value = round( fetch_ada_value( valid_address ), 2)
+    rewards_dict = get_api_rewards_data( valid_address )
+    ada_value = round( get_ada_value( valid_address ), 2)
 
     total_rewards = round( rewards_dict[ "total_rewards" ], 2)
     total_withdrawals = round( rewards_dict[ "total_withdrawals" ], 2)

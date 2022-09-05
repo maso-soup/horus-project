@@ -1,15 +1,16 @@
 {% extends "tools/base.html" %}
+{% load humanize %}
 {% block content %}
 
     <h1 class="pb-3"> Staking Rewards </h1>
 
     <b><a>Lifetime Rewards</a></b>
-    <p>You have earned <b>{{ total_rewards }}</b> Ada over this wallet's lifetime with <b>{{ total_withdrawable }}</b> currently available for withdrawal.</p>
+    <p>You have earned <b>{{ total_rewards | intcomma   }}</b> Ada over this wallet's lifetime with <b>{{ total_withdrawable }}</b> currently available for withdrawal.</p>
 
     <b><a>30 Day Rewards</a></b>
-    <p>You have earned <b>{{ total_last_month }}</b> Ada in the past 30 days.</p>
+    <p>You have earned <b>{{ total_last_month | intcomma   }}</b> Ada in the past 30 days.</p>
 
     <b><a>Stake Pool</a></b>
-    <p>You are currently staking <b>{{ ada_value }}</b> Ada with {{ pool_name }} [{{ pool_ticker }}].</p>
+    <p>You are currently staking <b>{{ ada_value | intcomma   }}</b> Ada with {{ pool_name }} [{{ pool_ticker }}].</p>
 
 {% endblock content %}
