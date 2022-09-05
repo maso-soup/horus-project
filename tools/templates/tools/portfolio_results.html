@@ -7,11 +7,11 @@
     <div class="row">
         <div class="col">
             <b><a>Conservative Portfolio Value</a></b>
-            <p>If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor }}</b> Ada.</p>
+            <p>If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor | intcomma }}</b> Ada.</p>
         </div>
         <div class="col">
             <b><a>Possible Portfolio Value</a></b>
-            <p>If you had time and were able to get sales based on rarity you could get around <b>{{ total_value }}</b> Ada.</p>
+            <p>If you had time and were able to get sales based on rarity you could get around <b>{{ total_value | intcomma }}</b> Ada.</p>
         </div>
     </div>
 
@@ -35,7 +35,7 @@
                 {% for token in token_list %}
                     <tr>
                     <th scope="row">{{ token.asset_name }}</th>
-                    <td>{{ token.asset_name }}</td>
+                    <td>{{ token.asset_ticker }}</td>
                     <td>{{ token.asset_value | intcomma  }}</td>
                     <td>Current price: {{ token.asset_price | intcomma  }}</td>
                     </tr>

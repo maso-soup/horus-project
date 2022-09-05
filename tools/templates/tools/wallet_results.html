@@ -13,7 +13,7 @@
             </div>
 
             {% for token in token_list %}
-                <div class="col-3">
+                <div class="col-4">
                     <img src="{{ token.asset_img_link }}" class="img-fluid img-thumbnail" alt="img">
                     <b><a>{{ token.asset_name }}</a></b>
                     <p>{{ token.asset_quantity | intcomma  }} tokens</p>
@@ -21,10 +21,9 @@
             {% endfor %}
 
             {% for nft in nfts_list %}
-                <div class="col-3">
+                <div class="col-4">
                     <img src="{{ nft.asset_img_link }}" class="img-fluid img-thumbnail" alt="img">
-                    <b><a>{{ nft.collection_name }}</a></b>
-                    <p>{{ nft.asset_name }}</p>
+                    <p><b>{{ nft.asset_name }}</b></p>
                 </div>
             {% endfor %}
         </div>

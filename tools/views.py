@@ -136,8 +136,6 @@ def get_asset_details( valid_stake_address ):
             print("UnicodeDecodeError")
 
         if asset_onchain_metadata :
-            print("On Chain: ")
-            print(asset_onchain_metadata)
 
             try:
                 metadata_image = asset_onchain_metadata[ 'image' ]
@@ -160,8 +158,6 @@ def get_asset_details( valid_stake_address ):
                 print("AttributeError " + asset_id )
 
         if asset_metadata :
-            print("Metadata: ")
-            print(asset_metadata)
 
             try:
                 asset_name = asset_metadata[ 'name' ]
@@ -212,21 +208,14 @@ def get_token_values( valid_asset_list ):
 
     for asset in valid_asset_list:
         asset_id = asset[ "asset_id" ]
-        token_dict = {}
+        token_dict = asset
 
         try:
             token_pair_info = response.json()[ asset_id + "_lovelace" ]
             token_price = float( token_pair_info[ "last_price" ] )
             token_quantity = asset[ "asset_quantity" ]
 
-            token_dict[ "asset_name" ] = asset[ 'asset_name' ]
-            token_dict[ "asset_img_link" ] = asset[ 'asset_img_link' ]
-            token_dict[ "asset_decimals" ] = asset[ 'asset_decimals' ]
-            token_dict[ "asset_ticker" ] = asset[ 'asset_ticker' ]
-            token_dict[ "asset_url" ] = asset[ 'asset_url' ]
-            token_dict[ "asset_logo" ] = asset[ 'asset_logo' ]
             token_dict[ "asset_price" ] = round( token_price, 2 )
-            token_dict[ "asset_quantity" ] = token_quantity
             token_dict[ "asset_value" ] = round( token_price * float( token_quantity ) / 1000000, 2 )
 
             token_list.append( token_dict )
@@ -238,27 +227,18 @@ def get_token_values( valid_asset_list ):
 
 def nft_request( url, asset ):
     '''Helper function to allow for easy implementation of
-    multithreading of slow API getes for NFT data gathering'''
+    multithreading of slow API gets for NFT data gathering'''
 
     asset_id = asset[ 'asset_id' ]
 
-    nft_dict = {}
+    nft_dict = asset
     policy_id = asset_id[ 0:56 ]
 
     asset_name = asset[ 'asset_name' ]
 
-    nft_dict[ "asset_img_link" ] = asset[ 'asset_img_link' ]
-    nft_dict[ "asset_decimals" ] = asset[ 'asset_decimals' ]
-    nft_dict[ "asset_ticker" ] = asset[ 'asset_ticker' ]
-    nft_dict[ "asset_url" ] = asset[ 'asset_url' ]
-    nft_dict[ "asset_logo" ] = asset[ 'asset_logo' ]
-
     if policy_id == HANDLE_POLICY_ID :
-        nft_dict[ "asset_name" ] = asset_name
         nft_dict[ "asset_value_floor" ] = 7.00
         nft_dict[ "collection_name" ] = "Ada Handle"
-        nft_dict[ "best_trait" ] = "Error"
-        nft_dict[ "asset_value" ] = -1
 
         if len( asset_name ) < 2 :
             nft_dict[ "best_trait" ] = "Legendary"
@@ -279,6 +259,10 @@ def nft_request( url, asset ):
         elif len( asset_name ) < 16 :
             nft_dict[ "best_trait" ] = "Basic"
             nft_dict[ "asset_value" ] = 15.00
+
+        else :
+            nft_dict[ "best_trait" ] = "Error"
+            nft_dict[ "asset_value" ] = -1
 
         return nft_dict
 
@@ -310,13 +294,6 @@ def nft_request( url, asset ):
     nft_dict[ "asset_value_floor" ] = float( absolute_floor )
     nft_dict[ "best_trait" ] = best_trait
     nft_dict[ "collection_name" ] = collection_name
-
-    nft_dict[ "asset_name" ] = asset_name
-    nft_dict[ "asset_img_link" ] = asset[ 'asset_img_link' ]
-    nft_dict[ "asset_decimals" ] = asset[ 'asset_decimals' ]
-    nft_dict[ "asset_ticker" ] = asset[ 'asset_ticker' ]
-    nft_dict[ "asset_url" ] = asset[ 'asset_url' ]
-    nft_dict[ "asset_logo" ] = asset[ 'asset_logo' ]
 
     return nft_dict
 
@@ -386,8 +363,10 @@ def portfolio( request, addr = None ):
     if not valid_address :
         return render( request, 'tools/portfolio_home_retry.html' )
 
-    token_list = get_token_values( valid_address )
-    nfts_list = get_nft_values( valid_address )
+    asset_detail_list = get_asset_details( valid_address )
+
+    token_list = get_token_values( asset_detail_list )
+    nfts_list = get_nft_values( asset_detail_list )
     ada_value = round( get_ada_value( valid_address ), 2)
 
     token_list_value = round( sum_asset_values( token_list ), 2 )
@@ -429,9 +408,11 @@ def summary( request, addr = None ):
 
     if not valid_address :
         return render( request, 'tools/summary_home_retry.html' )
+ 
+    asset_detail_list = get_asset_details( valid_address )
 
-    token_list = get_token_values( valid_address )
-    nfts_list = get_nft_values( valid_address )
+    token_list = get_token_values( asset_detail_list )
+    nfts_list = get_nft_values( asset_detail_list )
     ada_value = round( get_ada_value( valid_address ), 2)
 
     token_list_value = round( sum_asset_values( token_list ), 2 )
