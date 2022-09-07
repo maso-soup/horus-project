@@ -1,13 +1,10 @@
 body {
-    background: #eaf1ff
-}
-
-input[type="text"] {
-	position:relative;
-    width: 80%;
-    height: 40px;
+    /*background: #eaf1ff*/
+    background:black;
+    color:white;
 }
 
 .navbar {
-    background: #0047b8
+    /* background: #0047b8 */
+    background:goldenrod
 }

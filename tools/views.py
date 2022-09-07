@@ -39,7 +39,7 @@ def validate_address( input_address ):
             return address["stake_address"]
 
         if input_address.startswith( "$" ) :
-            handle = input_address[1:]
+            handle = input_address[1:].lower()
 
             handle_encoded = handle.encode( 'utf-8' )
             handle_name = handle_encoded.hex()
@@ -60,7 +60,9 @@ def get_ada_value( valid_stake_address ):
     if valid_stake_address == "" :
         return ada_value
 
-    ada_value = float( api.accounts( valid_stake_address, return_type='json' )[ "controlled_amount" ] ) / 1000000
+    account = api.accounts( valid_stake_address, return_type='json' )
+    ada_value = float( account[ "controlled_amount" ] ) / 1000000
+
     return ada_value
 
 def get_api_rewards_data( valid_stake_address ):
@@ -120,7 +122,7 @@ def get_asset_details( valid_stake_address ):
         asset_details = api.asset( asset_id, return_type='json' )
         asset_onchain_metadata = asset_details[ 'onchain_metadata' ]
         asset_metadata = asset_details[ 'metadata' ]
-        asset_quantity = asset[ 'quantity' ]
+        asset_quantity = float ( asset[ 'quantity' ] )
         asset_img_link = ""
         asset_decimals = ""
         asset_ticker = ""
@@ -143,19 +145,20 @@ def get_asset_details( valid_stake_address ):
                 asset_img_link = f'{ IPFS_API_URL }{ ipfs_id }'
 
             except AttributeError:
-                print("AttributeError " + asset_id )
-            
+                print("AttributeError Image Onchain " )
+                print( metadata_image )
+
             except KeyError:
-                print("AttributeError " + asset_id )
+                print("KeyError Image Onchain " + metadata_image )
 
             try:
                 asset_name = asset_onchain_metadata[ 'name' ]
-                
+
             except AttributeError:
-                print("AttributeError " + asset_id )
-            
+                print("AttributeError Onchain Name " + asset_id )
+
             except KeyError:
-                print("AttributeError " + asset_id )
+                print("KeyError Onchain Name " + asset_id )
 
         if asset_metadata :
 
@@ -163,33 +166,35 @@ def get_asset_details( valid_stake_address ):
                 asset_name = asset_metadata[ 'name' ]
 
             except AttributeError:
-                print("AttributeError " + asset_id )
-            
+                print("AttributeError Metadata Name " + asset_id )
+
             except KeyError:
-                print("AttributeError " + asset_id )
+                print("KeyError Metadata Name " + asset_id )
 
             try:
                 asset_decimals = asset_metadata[ 'decimals' ]
                 asset_ticker = asset_metadata[ 'ticker' ]
                 asset_url = asset_metadata[ 'url' ]
-                #asset_logo = asset_metadata[ 'logo' ]
-                asset_logo = ""
+                asset_logo = asset_metadata[ 'logo' ]
+                if not asset_img_link :
+                    asset_img_link = "data:image/jpeg;base64," + asset_logo
 
             except AttributeError:
-                print("AttributeError " + asset_id )
-            
+                print("AttributeError Metadata other" + asset_id )
+
             except KeyError:
-                print("AttributeError " + asset_id )
+                print("AttributeError Metadata other" + asset_id )
 
 
         asset_dict["asset_id"] = asset_id
         asset_dict["asset_name"] = asset_name
         asset_dict["asset_img_link"] = asset_img_link
-        asset_dict["asset_decimals"] = asset_decimals
         asset_dict["asset_ticker"] = asset_ticker
         asset_dict["asset_url"] = asset_url
-        asset_dict["asset_logo"] = asset_logo
         asset_dict["asset_quantity"] = asset_quantity
+
+        if asset_decimals :
+            asset_dict["asset_quantity"] = asset_quantity / pow(10, float( asset_decimals ) )
 
         asset_list_output.append( asset_dict )
 
@@ -278,7 +283,7 @@ def nft_request( url, asset ):
     if absolute_floor is None:
         absolute_floor = 0
 
-    trait_floors_dict_values = list(filter(None, (trait_floors_dict.values())))
+    trait_floors_dict_values = list( filter( None, ( trait_floors_dict.values() ) ) )
     best_trait_floor = 0
     best_trait = "nothing"
 
@@ -290,8 +295,8 @@ def nft_request( url, asset ):
             best_trait_floor = trait_val
             best_trait = trait_key
 
-    nft_dict[ "asset_value" ] = float( best_trait_floor )
-    nft_dict[ "asset_value_floor" ] = float( absolute_floor )
+    nft_dict[ "asset_value" ] = float( best_trait_floor ) * 1.00
+    nft_dict[ "asset_value_floor" ] = float( absolute_floor ) * 1.00
     nft_dict[ "best_trait" ] = best_trait
     nft_dict[ "collection_name" ] = collection_name
 
@@ -429,6 +434,7 @@ def summary( request, addr = None ):
     total_withdrawable = round( rewards_dict[ "total_withdrawable" ], 2)
     pool_name = rewards_dict[ "pool_name" ]
     pool_ticker = rewards_dict[ "pool_ticker" ]
+    pool_homepage = rewards_dict[ "pool_homepage" ]
     total_last_month = round( rewards_dict[ "total_last_month" ], 2)
 
     context = {
@@ -445,6 +451,7 @@ def summary( request, addr = None ):
         'total_withdrawable' : total_withdrawable,
         'pool_name' : pool_name,
         'pool_ticker' : pool_ticker,
+        'pool_homepage' : pool_homepage,
         'total_last_month' : total_last_month,
     }
 
@@ -472,15 +479,10 @@ def wallet( request, addr = None ):
 
     asset_detail_list = get_asset_details( valid_address )
 
-    token_list = get_token_values( asset_detail_list )
-
-    nfts_list = get_nft_values( asset_detail_list )
-
     ada_value = round( get_ada_value( valid_address ), 2)
 
     context = {
-        'token_list' : token_list,
-        'nfts_list' : nfts_list,
+        'asset_detail_list' : asset_detail_list,
         'ada_value' : ada_value,
     }
 
@@ -514,6 +516,7 @@ def staking( request, addr = None ):
     total_withdrawable = round( rewards_dict[ "total_withdrawable" ], 2)
     pool_name = rewards_dict[ "pool_name" ]
     pool_ticker = rewards_dict[ "pool_ticker" ]
+    pool_homepage = rewards_dict[ "pool_homepage" ]
     total_last_month = round( rewards_dict[ "total_last_month" ], 2)
 
     context = {
@@ -522,6 +525,7 @@ def staking( request, addr = None ):
         'total_withdrawable' : total_withdrawable,
         'pool_name' : pool_name,
         'pool_ticker' : pool_ticker,
+        'pool_homepage' : pool_homepage,
         'total_last_month' : total_last_month,
         'ada_value' : ada_value,
     }

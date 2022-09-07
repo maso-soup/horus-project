@@ -1,5 +1,6 @@
 {% extends "tools/base.html" %}
 {% load humanize %}
+{% load static %}
 {% block content %}
 
     <h1 class="pb-3"> Portfolio Value </h1>
@@ -16,9 +17,10 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table">
+        <table class="table table-dark table-hover align-middle">
             <thead>
                 <tr>
+                <th scope="col">#</th>
                 <th scope="col">Category</th>
                 <th scope="col">Name</th>
                 <th scope="col">Value</th>
@@ -27,6 +29,7 @@
             </thead>
             <tbody>
                 <tr>
+                <td><img src="{% static 'tools/cardano-logo.png' %}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
                 <th scope="row">Ada</th>
                 <td>Ada</td>
                 <td>{{ ada_value  | intcomma  }}</td>
@@ -34,6 +37,7 @@
                 </tr>
                 {% for token in token_list %}
                     <tr>
+                    <td><img src="{{ token.asset_img_link }}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
                     <th scope="row">{{ token.asset_name }}</th>
                     <td>{{ token.asset_ticker }}</td>
                     <td>{{ token.asset_value | intcomma  }}</td>
@@ -42,6 +46,7 @@
                 {% endfor %}
                 {% for nft in nfts_list %}
                     <tr>
+                    <td><img src="{{ nft.asset_img_link }}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
                     <th scope="row">{{ nft.collection_name }}</th>
                     <td>{{ nft.asset_name }}</td>
                     <td>{{ nft.asset_value | intcomma   }}</td>

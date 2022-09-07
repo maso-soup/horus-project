@@ -11,6 +11,6 @@
     <p>You have earned <b>{{ total_last_month | intcomma   }}</b> Ada in the past 30 days.</p>
 
     <b><a>Stake Pool</a></b>
-    <p>You are currently staking <b>{{ ada_value | intcomma   }}</b> Ada with {{ pool_name }} [{{ pool_ticker }}].</p>
+    <p>You are currently staking <b>{{ ada_value | intcomma   }}</b> Ada with <a href="{{ pool_homepage }}" target="_blank" rel="noopener noreferrer">{{ pool_name }} [{{ pool_ticker }}]</a>.</p>
 
 {% endblock content %}

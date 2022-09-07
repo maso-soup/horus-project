@@ -9,23 +9,17 @@
         <div class="row">
             <div class="col-12">
                 <b><a>Ada</a></b>
-                <p>{{ ada_value | intcomma }} tokens</p>
+                <p><b>{{ ada_value | intcomma }}</b></p>
             </div>
 
-            {% for token in token_list %}
+            {% for asset in asset_detail_list %}
                 <div class="col-4">
-                    <img src="{{ token.asset_img_link }}" class="img-fluid img-thumbnail" alt="img">
-                    <b><a>{{ token.asset_name }}</a></b>
-                    <p>{{ token.asset_quantity | intcomma  }} tokens</p>
+                    <img src="{{ asset.asset_img_link }}" class="img-fluid rounded" width="200" height="200" alt="img">
+                    <b><p>{{ asset.asset_name }}</p></b>
+                    <p>{{ asset.asset_quantity | intcomma  }}</p>
                 </div>
             {% endfor %}
 
-            {% for nft in nfts_list %}
-                <div class="col-4">
-                    <img src="{{ nft.asset_img_link }}" class="img-fluid img-thumbnail" alt="img">
-                    <p><b>{{ nft.asset_name }}</b></p>
-                </div>
-            {% endfor %}
         </div>
     </div>
     
