@@ -19,6 +19,11 @@
         <link rel="stylesheet" type="text/css" href="{% static 'tools/main.css' %}">
         <link rel="shortcut icon" type="image/png" href="{% static 'tools/favicon.ico' %}"/>
 
+        {% if title %}
+            <title>Eye of Horus - {{ title }}</title>
+        {% else %}
+            <title>Eye of Horus</title>
+        {% endif %}
 
     </head>
     <body>

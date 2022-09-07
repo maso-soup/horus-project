@@ -8,6 +8,7 @@ from blockfrost import ApiError, ApiUrls, BlockFrostApi
 from django.shortcuts import render
 
 import json
+from time import perf_counter
 
 #BlockFrost API which allows for querying the Cardano blockchain
 api = BlockFrostApi(
@@ -105,104 +106,136 @@ def get_api_rewards_data( valid_stake_address ):
 
     return rewards_dict
 
-def get_asset_details( valid_stake_address ):
+def asset_request( asset ):
     '''Get asset details and return list'''
 
+    t2_start = perf_counter()
+
+    asset_id = asset[ 'unit' ]
+    asset_dict = {}
+
+    asset_details = api.asset( asset_id, return_type='json' )
+    asset_onchain_metadata = asset_details[ 'onchain_metadata' ]
+    asset_metadata = asset_details[ 'metadata' ]
+    asset_quantity = float ( asset[ 'quantity' ] )
+    asset_img_link = ""
+    asset_decimals = ""
+    asset_ticker = ""
+    asset_url = ""
+    asset_logo = ""
+    asset_name = ""
+
+    try:
+        asset_name = bytes.fromhex( asset_id[56:] ).decode( 'utf-8' )
+
+    except UnicodeDecodeError:
+        asset_name = bytes.fromhex( asset_id[56:] )
+        print("UnicodeDecodeError")
+
+    if asset_onchain_metadata :
+
+        try:
+            metadata_image = asset_onchain_metadata[ 'image' ]
+            ipfs_id = metadata_image.partition( '//' )[2]
+            asset_img_link = f'{ IPFS_API_URL }{ ipfs_id }'
+            if "ipfs/" in ipfs_id :
+                ipfs_id = ipfs_id.partition( 'ipfs/' )[2]
+                asset_img_link = f'{ IPFS_API_URL }{ ipfs_id }'
+
+        except AttributeError:
+            print("AttributeError Image Onchain " )
+            if isinstance( metadata_image, list ) :
+                ipfs_id_string = "".join( metadata_image )
+                ipfs_id = ipfs_id_string.partition( '//' )[2]
+                asset_img_link = f'{ IPFS_API_URL }{ ipfs_id }'
+
+                if "ipfs/" in ipfs_id :
+                    ipfs_id = ipfs_id.partition( 'ipfs/' )[2]
+                    asset_img_link = f'{ IPFS_API_URL }{ ipfs_id }'
+
+        except KeyError:
+            print("KeyError Image Onchain " + metadata_image )
+
+        try:
+            asset_name = asset_onchain_metadata[ 'name' ]
+
+        except AttributeError:
+            print("AttributeError Onchain Name " + asset_id )
+
+        except KeyError:
+            print("KeyError Onchain Name " + asset_id )
+
+    if asset_metadata :
+
+        try:
+            asset_name = asset_metadata[ 'name' ]
+
+        except AttributeError:
+            print("AttributeError Metadata Name " + asset_id )
+
+        except KeyError:
+            print("KeyError Metadata Name " + asset_id )
+
+        try:
+            asset_decimals = asset_metadata[ 'decimals' ]
+            asset_ticker = asset_metadata[ 'ticker' ]
+            asset_url = asset_metadata[ 'url' ]
+            asset_logo = asset_metadata[ 'logo' ]
+            if not asset_img_link :
+                asset_img_link = "data:image/jpeg;base64," + asset_logo
+
+        except AttributeError:
+            print("AttributeError Metadata other" + asset_id )
+
+        except KeyError:
+            print("AttributeError Metadata other" + asset_id )
+
+
+    asset_dict["asset_id"] = asset_id
+    asset_dict["asset_name"] = asset_name
+    asset_dict["asset_img_link"] = asset_img_link
+    asset_dict["asset_ticker"] = asset_ticker
+    asset_dict["asset_url"] = asset_url
+    asset_dict["asset_quantity"] = asset_quantity
+
+    if asset_decimals :
+        asset_dict["asset_quantity"] = asset_quantity / pow(10, float( asset_decimals ) )
+
+    t2_stop = perf_counter()
+    print(f'This asset {asset_name} took:  {t2_stop - t2_start}' )
+
+    return asset_dict
+
+def get_asset_details( valid_stake_address ):
+    '''Function for geting the Ada value of every NFT in the
+    wallet of a given valid address. Uses data from CNFTJungle'''
+    t1_start = perf_counter()
+
     asset_list_output = []
+    threads= []
 
     if valid_stake_address == "" :
         return asset_list_output
 
-    asset_list = api.account_addresses_assets( valid_stake_address, return_type='json' )
+    valid_asset_list = api.account_addresses_assets( valid_stake_address, return_type='json' )
 
-    for asset in asset_list:
-        asset_id = asset[ 'unit' ]
-        asset_dict = {}
+    with ThreadPoolExecutor( max_workers=20 ) as executor:
+        for asset in valid_asset_list:
+            threads.append( executor.submit( asset_request, asset ) )
 
-        asset_details = api.asset( asset_id, return_type='json' )
-        asset_onchain_metadata = asset_details[ 'onchain_metadata' ]
-        asset_metadata = asset_details[ 'metadata' ]
-        asset_quantity = float ( asset[ 'quantity' ] )
-        asset_img_link = ""
-        asset_decimals = ""
-        asset_ticker = ""
-        asset_url = ""
-        asset_logo = ""
-        asset_name = ""
+        for task in as_completed( threads ):
+            asset_dict = task.result()
+            asset_list_output.append( asset_dict )
 
-        try:
-            asset_name = bytes.fromhex( asset_id[56:] ).decode( 'utf-8' )
-
-        except UnicodeDecodeError:
-            asset_name = bytes.fromhex( asset_id[56:] )
-            print("UnicodeDecodeError")
-
-        if asset_onchain_metadata :
-
-            try:
-                metadata_image = asset_onchain_metadata[ 'image' ]
-                ipfs_id = metadata_image.partition( '//' )[-1]
-                asset_img_link = f'{ IPFS_API_URL }{ ipfs_id }'
-
-            except AttributeError:
-                print("AttributeError Image Onchain " )
-                print( metadata_image )
-
-            except KeyError:
-                print("KeyError Image Onchain " + metadata_image )
-
-            try:
-                asset_name = asset_onchain_metadata[ 'name' ]
-
-            except AttributeError:
-                print("AttributeError Onchain Name " + asset_id )
-
-            except KeyError:
-                print("KeyError Onchain Name " + asset_id )
-
-        if asset_metadata :
-
-            try:
-                asset_name = asset_metadata[ 'name' ]
-
-            except AttributeError:
-                print("AttributeError Metadata Name " + asset_id )
-
-            except KeyError:
-                print("KeyError Metadata Name " + asset_id )
-
-            try:
-                asset_decimals = asset_metadata[ 'decimals' ]
-                asset_ticker = asset_metadata[ 'ticker' ]
-                asset_url = asset_metadata[ 'url' ]
-                asset_logo = asset_metadata[ 'logo' ]
-                if not asset_img_link :
-                    asset_img_link = "data:image/jpeg;base64," + asset_logo
-
-            except AttributeError:
-                print("AttributeError Metadata other" + asset_id )
-
-            except KeyError:
-                print("AttributeError Metadata other" + asset_id )
-
-
-        asset_dict["asset_id"] = asset_id
-        asset_dict["asset_name"] = asset_name
-        asset_dict["asset_img_link"] = asset_img_link
-        asset_dict["asset_ticker"] = asset_ticker
-        asset_dict["asset_url"] = asset_url
-        asset_dict["asset_quantity"] = asset_quantity
-
-        if asset_decimals :
-            asset_dict["asset_quantity"] = asset_quantity / pow(10, float( asset_decimals ) )
-
-        asset_list_output.append( asset_dict )
+    t1_stop = perf_counter()
+    print("All Detail Assets took: ", t1_stop - t1_start )
 
     return asset_list_output
 
 def get_token_values( valid_asset_list ):
     '''Function for geting the Ada value of every token in the wallet of a given
     valid address. Price data provided by MinSwap'''
+    t1_start = perf_counter()
 
     token_list = []
 
@@ -215,7 +248,9 @@ def get_token_values( valid_asset_list ):
         asset_id = asset[ "asset_id" ]
         token_dict = asset
 
-        try:
+        asset_pair = asset_id + "_lovelace"
+
+        if asset_pair in response.json() :
             token_pair_info = response.json()[ asset_id + "_lovelace" ]
             token_price = float( token_pair_info[ "last_price" ] )
             token_quantity = asset[ "asset_quantity" ]
@@ -225,14 +260,15 @@ def get_token_values( valid_asset_list ):
 
             token_list.append( token_dict )
 
-        except KeyError:
-            print( "KeyError from " + asset_id )
+    t1_stop = perf_counter()
+    print("Token Values took: ", t1_stop - t1_start )
 
     return token_list
 
 def nft_request( url, asset ):
     '''Helper function to allow for easy implementation of
     multithreading of slow API gets for NFT data gathering'''
+    t1_start = perf_counter()
 
     asset_id = asset[ 'asset_id' ]
 
@@ -300,11 +336,15 @@ def nft_request( url, asset ):
     nft_dict[ "best_trait" ] = best_trait
     nft_dict[ "collection_name" ] = collection_name
 
+    t1_stop = perf_counter()
+    print("This single NFT took: ", t1_stop - t1_start )
+
     return nft_dict
 
 def get_nft_values( valid_asset_list ):
     '''Function for geting the Ada value of every NFT in the
     wallet of a given valid address. Uses data from CNFTJungle'''
+    t1_start = perf_counter()
 
     nfts_list = []
     threads= []
@@ -324,6 +364,9 @@ def get_nft_values( valid_asset_list ):
             #does not show items worth zero, convenience right now, fix in future for wallet vs portfolio display
             if nft_dict and nft_dict[ 'asset_value' ] :
                 nfts_list.append( nft_dict )
+
+    t1_stop = perf_counter()
+    print("All NFTs took: ", t1_stop - t1_start )
 
     return nfts_list
 
@@ -413,7 +456,7 @@ def summary( request, addr = None ):
 
     if not valid_address :
         return render( request, 'tools/summary_home_retry.html' )
- 
+
     asset_detail_list = get_asset_details( valid_address )
 
     token_list = get_token_values( asset_detail_list )
