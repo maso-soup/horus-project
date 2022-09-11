@@ -154,7 +154,7 @@ def asset_request( asset ):
                     asset_img_link = f'{ IPFS_API_URL }{ ipfs_id }'
 
         except KeyError:
-            print("KeyError Image Onchain " + metadata_image )
+            print("KeyError Image Onchain " )
 
         try:
             asset_name = asset_onchain_metadata[ 'name' ]
@@ -256,7 +256,7 @@ def get_token_values( valid_asset_list ):
             token_quantity = asset[ "asset_quantity" ]
 
             token_dict[ "asset_price" ] = round( token_price, 2 )
-            token_dict[ "asset_value" ] = round( token_price * float( token_quantity ) / 1000000, 2 )
+            token_dict[ "asset_value" ] = round( token_price * token_quantity, 2 )
 
             token_list.append( token_dict )
 
@@ -312,9 +312,11 @@ def nft_request( url, asset ):
     if response.status_code != 200 :
         return {}
 
-    collection_name = response.json()[ 'collection_name' ]
-    trait_floors_dict = response.json()[ 'traitfloors' ]
-    absolute_floor = response.json()[ 'floor' ]
+    nft_data = response.json()
+
+    collection_name = nft_data[ 'collection_name' ]
+    trait_floors_dict = nft_data[ 'traitfloors' ]
+    absolute_floor = nft_data[ 'floor' ]
 
     if absolute_floor is None:
         absolute_floor = 0
@@ -331,8 +333,8 @@ def nft_request( url, asset ):
             best_trait_floor = trait_val
             best_trait = trait_key
 
-    nft_dict[ "asset_value" ] = float( best_trait_floor ) * 1.00
-    nft_dict[ "asset_value_floor" ] = float( absolute_floor ) * 1.00
+    nft_dict[ "asset_value" ] = float( best_trait_floor ) if best_trait_floor else absolute_floor
+    nft_dict[ "asset_value_floor" ] = float( absolute_floor )
     nft_dict[ "best_trait" ] = best_trait
     nft_dict[ "collection_name" ] = collection_name
 
@@ -362,6 +364,7 @@ def get_nft_values( valid_asset_list ):
         for task in as_completed( threads ):
             nft_dict = task.result()
             #does not show items worth zero, convenience right now, fix in future for wallet vs portfolio display
+            print(nft_dict)
             if nft_dict and nft_dict[ 'asset_value' ] :
                 nfts_list.append( nft_dict )
 
@@ -390,52 +393,6 @@ def sum_asset_values_floor( assets_list ):
         total_value = total_value + asset[ "asset_value_floor" ]
 
     return total_value
-
-def portfolio( request, addr = None ):
-    '''Function to render the contents of the entered
-    wallet address and the calculated values of the contained assets'''
-
-    address = ""
-
-    if request.method == 'GET' and not addr :
-        return render( request, 'tools/portfolio_home.html' )
-
-    if request.method == 'GET' and addr :
-        address = addr
-
-    if request.method == 'POST' :
-        address = request.POST.get('addr', None)
-
-    valid_address = validate_address( address )
-
-    if not valid_address :
-        return render( request, 'tools/portfolio_home_retry.html' )
-
-    asset_detail_list = get_asset_details( valid_address )
-
-    token_list = get_token_values( asset_detail_list )
-    nfts_list = get_nft_values( asset_detail_list )
-    ada_value = round( get_ada_value( valid_address ), 2)
-
-    token_list_value = round( sum_asset_values( token_list ), 2 )
-    nfts_list_value = round( sum_asset_values( nfts_list ), 2 )
-    nfts_list_value_floor = round( sum_asset_values_floor( nfts_list ), 2 )
-
-    total_value = round( ada_value + token_list_value + nfts_list_value, 2)
-    total_value_using_floor = round( ada_value + token_list_value + nfts_list_value_floor, 2 )
-
-    context = {
-        'token_list' : token_list,
-        'nfts_list' : nfts_list,
-        'total_value' : total_value,
-        'total_value_using_floor' : total_value_using_floor,
-        'token_list_value' : token_list_value,
-        'nfts_list_value_floor' : nfts_list_value_floor,
-        'nfts_list_value' : nfts_list_value,
-        'ada_value' : ada_value,
-    }
-
-    return render( request, 'tools/portfolio_results.html', context )
 
 def summary( request, addr = None ):
     '''Function to render the contents of the entered
@@ -530,48 +487,3 @@ def wallet( request, addr = None ):
     }
 
     return render( request, 'tools/wallet_results.html', context )
-
-def staking( request, addr = None ):
-    '''Function to render the staking details of the entered
-    wallet address'''
-
-    address = ""
-
-    if request.method == 'GET' and not addr :
-        return render( request, 'tools/staking_home.html' )
-
-    if request.method == 'GET' and addr :
-        address = addr
-
-    if request.method == 'POST' :
-        address = request.POST.get('addr', None)
-
-    valid_address = validate_address( address )
-
-    if not valid_address :
-        return render( request, 'tools/staking_home_retry.html' )
-
-    rewards_dict = get_api_rewards_data( valid_address )
-    ada_value = round( get_ada_value( valid_address ), 2)
-
-    total_rewards = round( rewards_dict[ "total_rewards" ], 2)
-    total_withdrawals = round( rewards_dict[ "total_withdrawals" ], 2)
-    total_withdrawable = round( rewards_dict[ "total_withdrawable" ], 2)
-    pool_name = rewards_dict[ "pool_name" ]
-    pool_ticker = rewards_dict[ "pool_ticker" ]
-    pool_homepage = rewards_dict[ "pool_homepage" ]
-    total_last_month = round( rewards_dict[ "total_last_month" ], 2)
-
-    context = {
-        'total_rewards' : total_rewards,
-        'total_withdrawals' : total_withdrawals,
-        'total_withdrawable' : total_withdrawable,
-        'pool_name' : pool_name,
-        'pool_ticker' : pool_ticker,
-        'pool_homepage' : pool_homepage,
-        'total_last_month' : total_last_month,
-        'ada_value' : ada_value,
-    }
-
-    return render( request, 'tools/staking_results.html', context )
-    

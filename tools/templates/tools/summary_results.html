@@ -3,31 +3,32 @@
 {% load static %}
 {% block content %}
 
-<h1 class="pb-3"> Summary  </h1>
+<h1 class="display-1 pb-3"> Summary  </h1>
+
+<div class="row">
+    <div class="col">
+        <img src="{% static 'tools/glass-half-full.png' %}" class="img-fluid" width="100" height="100" alt="img">
+        <p class="lead">If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor | intcomma  }}</b> Ada.</p>
+    </div>
+    <div class="col">
+        <img src="{% static 'tools/full-glass.png' %}" class="img-fluid" width="100" height="100" alt="img">
+        <p class="lead">If you had time and were able to get sales based on rarity you could get around <b>{{ total_value | intcomma  }}</b> Ada.</p>
+    </div>
+</div>
 
 <div class="container pb-3">
     <div class="row">
         <div class="col">
-            <b><a>Lifetime Staking Rewards</a></b>
-            <p>You have earned <b>{{ total_rewards | intcomma }}</b> Ada over this wallet's lifetime.</p>
+            <img src="{% static 'tools/trophy.png' %}" class="img-fluid" width="100" height="100" alt="img">
+            <p class="lead">You have earned <b>{{ total_rewards | intcomma }}</b> Ada over this wallet's lifetime.</p>
         </div>
         <div class="col">
-            <b><a>30 Day Staking Rewards</a></b>
-            <p>You have earned <b>{{ total_last_month | intcomma }}</b> Ada in the past 30 days.</p>
+            <img src="{% static 'tools/calendar.png' %}" class="img-fluid" width="100" height="100" alt="img">
+            <p class="lead">You have earned <b>{{ total_last_month | intcomma }}</b> Ada in the past 30 days.</p>
         </div>
         <div class="col">
-            <b><a>Stake Pool</a></b>
-            <p>You are currently staking <b>{{ ada_value | intcomma  }}</b> Ada with <a href="{{ pool_homepage }}" target="_blank" rel="noopener noreferrer">{{ pool_name }} [{{ pool_ticker }}]</a>.</p>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <b><a>Conservative Portfolio Value</a></b>
-            <p>If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor | intcomma  }}</b> Ada.</p>
-        </div>
-        <div class="col">
-            <b><a>Possible Portfolio Value</a></b>
-            <p>If you had time and were able to get sales based on rarity you could get around <b>{{ total_value | intcomma  }}</b> Ada.</p>
+            <img src="{% static 'tools/network-node.png' %}" class="img-fluid" width="100" height="100" alt="img">
+            <p class="lead">You are currently staking <b>{{ ada_value | intcomma  }}</b> Ada with <a href="{{ pool_homepage }}" target="_blank" rel="noopener noreferrer">{{ pool_name }} [{{ pool_ticker }}]</a>.</p>
         </div>
     </div>
 
@@ -37,16 +38,16 @@
     <table class="table table-dark table-hover align-middle">
         <thead>
             <tr>
-            <th scope="col">#</th>
-            <th scope="col">Category</th>
-            <th scope="col">Name</th>
+            <th scope="col"></th>
+            <th scope="col">Project</th>
+            <th scope="col">Asset</th>
             <th scope="col">Value (ADA)</th>
             <th scope="col">Detail</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-            <td><img src="{% static 'tools/cardano-logo.png' %}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
+            <td><img src="{% static 'tools/cardano-logo-gold.png' %}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
             <th scope="row">Ada</th>
             <td>Ada</td>
             <td>{{ ada_value | intcomma  }}</td>
@@ -63,7 +64,7 @@
             {% endfor %}
             {% for nft in nfts_list %}
                 <tr>
-                    <td><img src="{{ nft.asset_img_link }}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
+                <td><img src="{{ nft.asset_img_link }}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
                 <th scope="row">{{ nft.collection_name }}</th>
                 <td>{{ nft.asset_name }}</td>
                 <td>{{ nft.asset_value | intcomma  }}</td>
