@@ -86,9 +86,11 @@ def get_api_rewards_data( valid_stake_address ):
 
     pool_id = api_rewards_data[ "pool_id" ]
 
-    pool_ticker = api.pool_metadata( pool_id, return_type='json' )[ "ticker" ]
-    pool_name = api.pool_metadata( pool_id, return_type='json' )[ "name" ]
-    pool_homepage = api.pool_metadata( pool_id, return_type='json' )[ "homepage" ]
+    pool_info = api.pool_metadata( pool_id, return_type='json' )
+
+    pool_ticker = pool_info[ "ticker" ]
+    pool_name = pool_info[ "name" ]
+    pool_homepage = pool_info[ "homepage" ]
 
     rewards_dict[ "pool_ticker" ] = pool_ticker
     rewards_dict[ "pool_name" ] = pool_name
@@ -201,6 +203,9 @@ def asset_request( asset ):
     if asset_decimals :
         asset_dict["asset_quantity"] = asset_quantity / pow(10, float( asset_decimals ) )
 
+    if asset_dict["asset_quantity"] == 1 :
+        asset_dict["asset_quantity"] = int (1)
+
     t2_stop = perf_counter()
     print(f'This asset {asset_name} took:  {t2_stop - t2_start}' )
 
@@ -219,7 +224,7 @@ def get_asset_details( valid_stake_address ):
 
     valid_asset_list = api.account_addresses_assets( valid_stake_address, return_type='json' )
 
-    with ThreadPoolExecutor( max_workers=20 ) as executor:
+    with ThreadPoolExecutor() as executor:
         for asset in valid_asset_list:
             threads.append( executor.submit( asset_request, asset ) )
 
@@ -244,14 +249,16 @@ def get_token_values( valid_asset_list ):
     if response.status_code != 200 :
         return token_list
 
+    response_JSON = response.json()
+
     for asset in valid_asset_list:
         asset_id = asset[ "asset_id" ]
         token_dict = asset
 
         asset_pair = asset_id + "_lovelace"
 
-        if asset_pair in response.json() :
-            token_pair_info = response.json()[ asset_id + "_lovelace" ]
+        if asset_pair in response_JSON :
+            token_pair_info = response_JSON[ asset_id + "_lovelace" ]
             token_price = float( token_pair_info[ "last_price" ] )
             token_quantity = asset[ "asset_quantity" ]
 
@@ -354,7 +361,7 @@ def get_nft_values( valid_asset_list ):
     #Initializing the list of assets contained in the account, as well as the total controlled
     #amount of Ada which includes Ada in all addresses as well as rewards yet to be redeemed
 
-    with ThreadPoolExecutor( max_workers=20 ) as executor:
+    with ThreadPoolExecutor() as executor:
         for asset in valid_asset_list:
             asset_id = asset[ "asset_id" ]
             url = CNFTJUNGLE_API_URL + asset_id
@@ -364,7 +371,6 @@ def get_nft_values( valid_asset_list ):
         for task in as_completed( threads ):
             nft_dict = task.result()
             #does not show items worth zero, convenience right now, fix in future for wallet vs portfolio display
-            print(nft_dict)
             if nft_dict and nft_dict[ 'asset_value' ] :
                 nfts_list.append( nft_dict )
 
@@ -418,28 +424,31 @@ def summary( request, addr = None ):
 
     token_list = get_token_values( asset_detail_list )
     nfts_list = get_nft_values( asset_detail_list )
+    sorted_token_list = sorted( token_list, key = lambda item: item[ 'asset_value' ], reverse=True )
+    sorted_nfts_list = sorted( nfts_list, key = lambda item: item[ 'asset_value' ], reverse=True )
+
     ada_value = round( get_ada_value( valid_address ), 2)
 
     token_list_value = round( sum_asset_values( token_list ), 2 )
     nfts_list_value = round( sum_asset_values( nfts_list ), 2 )
     nfts_list_value_floor = round( sum_asset_values_floor( nfts_list ), 2 )
 
-    total_value = round( ada_value + token_list_value + nfts_list_value, 2)
+    total_value = round( ada_value + token_list_value + nfts_list_value, 2 )
     total_value_using_floor = round( ada_value + token_list_value + nfts_list_value_floor, 2 )
 
     rewards_dict = get_api_rewards_data( valid_address )
 
-    total_rewards = round( rewards_dict[ "total_rewards" ], 2)
-    total_withdrawals = round( rewards_dict[ "total_withdrawals" ], 2)
-    total_withdrawable = round( rewards_dict[ "total_withdrawable" ], 2)
+    total_rewards = round( rewards_dict[ "total_rewards" ], 2 )
+    total_withdrawals = round( rewards_dict[ "total_withdrawals" ], 2 )
+    total_withdrawable = round( rewards_dict[ "total_withdrawable" ], 2 )
     pool_name = rewards_dict[ "pool_name" ]
     pool_ticker = rewards_dict[ "pool_ticker" ]
     pool_homepage = rewards_dict[ "pool_homepage" ]
-    total_last_month = round( rewards_dict[ "total_last_month" ], 2)
+    total_last_month = round( rewards_dict[ "total_last_month" ], 2 )
 
     context = {
-        'token_list' : token_list,
-        'nfts_list' : nfts_list,
+        'token_list' : sorted_token_list,
+        'nfts_list' : sorted_nfts_list,
         'total_value' : total_value,
         'total_value_using_floor' : total_value_using_floor,
         'token_list_value' : token_list_value,
@@ -478,11 +487,12 @@ def wallet( request, addr = None ):
         return render( request, 'tools/wallet_home_retry.html' )
 
     asset_detail_list = get_asset_details( valid_address )
+    sorted_asset_detailed_list = sorted( asset_detail_list, key = lambda item: item[ 'asset_name' ] )
 
-    ada_value = round( get_ada_value( valid_address ), 2)
+    ada_value = round( get_ada_value( valid_address ), 2 )
 
     context = {
-        'asset_detail_list' : asset_detail_list,
+        'asset_detail_list' : sorted_asset_detailed_list,
         'ada_value' : ada_value,
     }
 

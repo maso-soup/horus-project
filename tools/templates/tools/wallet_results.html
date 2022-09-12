@@ -4,21 +4,22 @@
 
     <title> Wallet </title>
 
-    <h1> Wallet Contents </h1>
+    <h1 class="display-3"> Wallet Contents </h1>
 
 
     <div class="container p-3">
-        <div class="row align-items-center">
-            <div class="col-12">
-                <b><a>Ada</a></b>
-                <p><b>{{ ada_value | intcomma }}</b></p>
+        <div class="row justify-content-center">
+            <div class="col-12 lead pb-3">
+                <p><b>{{ ada_value | intcomma }}</b> Ada</p>
             </div>
 
             {% for asset in asset_detail_list %}
-                <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-2">
-                    <img src="{{ asset.asset_img_link }}" class="img-fluid rounded" width="150" height="150" alt="img">
-                    <p>{{ asset.asset_name }}</p>
-                    <p>{{ asset.asset_quantity | intcomma  }}</p>
+                <div class="col-6 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-2">
+                    <img src="{{ asset.asset_img_link }}" loading="lazy" class="img-fluid rounded" width="150" height="150" alt="img">
+                    <p>
+                        {{ asset.asset_name }} <br>
+                        {{ asset.asset_quantity | intcomma  }}
+                    </p>
                 </div>
             {% endfor %}
 

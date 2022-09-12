@@ -3,31 +3,31 @@
 {% load static %}
 {% block content %}
 
-<h1 class="display-1 pb-3"> Summary  </h1>
+<h1 class="display-3 pb-3"> Summary  </h1>
 
 <div class="row">
     <div class="col">
-        <img src="{% static 'tools/glass-half-full.png' %}" class="img-fluid" width="100" height="100" alt="img">
-        <p class="lead">If you had to sell everything as fast as possible you could get around <b>{{ total_value_using_floor | intcomma  }}</b> Ada.</p>
+        <img src="{% static 'tools/glass-half-full.png' %}" class="img-fluid" width="80" height="80" alt="img">
+        <p class="lead">Selling quickly and at floor prices you could get around <b>{{ total_value_using_floor | intcomma  }}</b> Ada.</p>
     </div>
     <div class="col">
-        <img src="{% static 'tools/full-glass.png' %}" class="img-fluid" width="100" height="100" alt="img">
-        <p class="lead">If you had time and were able to get sales based on rarity you could get around <b>{{ total_value | intcomma  }}</b> Ada.</p>
+        <img src="{% static 'tools/full-glass.png' %}" class="img-fluid" width="80" height="80" alt="img">
+        <p class="lead">Being patient and selling based on rarity you could get around <b>{{ total_value | intcomma  }}</b> Ada.</p>
     </div>
 </div>
 
 <div class="container pb-3">
     <div class="row">
         <div class="col">
-            <img src="{% static 'tools/trophy.png' %}" class="img-fluid" width="100" height="100" alt="img">
+            <img src="{% static 'tools/trophy.png' %}" class="img-fluid" width="80" height="80" alt="img">
             <p class="lead">You have earned <b>{{ total_rewards | intcomma }}</b> Ada over this wallet's lifetime.</p>
         </div>
         <div class="col">
-            <img src="{% static 'tools/calendar.png' %}" class="img-fluid" width="100" height="100" alt="img">
+            <img src="{% static 'tools/calendar.png' %}" class="img-fluid" width="80" height="80" alt="img">
             <p class="lead">You have earned <b>{{ total_last_month | intcomma }}</b> Ada in the past 30 days.</p>
         </div>
         <div class="col">
-            <img src="{% static 'tools/network-node.png' %}" class="img-fluid" width="100" height="100" alt="img">
+            <img src="{% static 'tools/network-node.png' %}" class="img-fluid" width="80" height="80" alt="img">
             <p class="lead">You are currently staking <b>{{ ada_value | intcomma  }}</b> Ada with <a href="{{ pool_homepage }}" target="_blank" rel="noopener noreferrer">{{ pool_name }} [{{ pool_ticker }}]</a>.</p>
         </div>
     </div>
@@ -47,7 +47,7 @@
         </thead>
         <tbody>
             <tr>
-            <td><img src="{% static 'tools/cardano-logo-gold.png' %}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
+            <td><img src="{% static 'tools/cardano-logo-gold.png' %}" width="50rem" height="50rem" class="rounded" alt="img"></td>
             <th scope="row">Ada</th>
             <td>Ada</td>
             <td>{{ ada_value | intcomma  }}</td>
@@ -55,7 +55,7 @@
             </tr>
             {% for token in token_list %}
                 <tr>
-                <td><img src="{{ token.asset_img_link }}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
+                <td><img src="{{ token.asset_img_link }}" loading="lazy" width="50rem" height="50rem" class="rounded" alt="img"></td>
                 <th scope="row">{{ token.asset_name }}</th>
                 <td>{{ token.asset_ticker }}</td>
                 <td>{{ token.asset_value | intcomma  }}</td>
@@ -64,7 +64,7 @@
             {% endfor %}
             {% for nft in nfts_list %}
                 <tr>
-                <td><img src="{{ nft.asset_img_link }}" width="50" height="50" class="img-fluid rounded" alt="img"></td>
+                <td><img src="{{ nft.asset_img_link }}" loading="lazy" width="50rem" height="50rem" class="rounded" alt="img"></td>
                 <th scope="row">{{ nft.collection_name }}</th>
                 <td>{{ nft.asset_name }}</td>
                 <td>{{ nft.asset_value | intcomma  }}</td>
