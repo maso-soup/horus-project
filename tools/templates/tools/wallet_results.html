@@ -15,7 +15,7 @@
 
             {% for asset in asset_detail_list %}
                 <div class="col-6 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-2">
-                    <img src="{{ asset.asset_img_link }}" loading="lazy" class="img-fluid rounded" width="150" height="150" alt="img">
+                    <img src="{{ asset.asset_img_link }}" class="img-fluid rounded" width="150" height="150" alt="img">
                     <p>
                         {{ asset.asset_name }} <br>
                         {{ asset.asset_quantity | intcomma  }}
