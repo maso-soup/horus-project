@@ -10,4 +10,6 @@ urlpatterns = [
 
     path('wallet/', views.wallet, name='wallet'),
     path('wallet/<str:addr>', views.wallet, name='wallet-param'),
+
+    path('faq/', views.faq, name='faq'),
 ]

@@ -7,7 +7,6 @@ import requests
 from blockfrost import ApiError, ApiUrls, BlockFrostApi
 from django.shortcuts import render
 
-import json
 from time import perf_counter
 
 #BlockFrost API which allows for querying the Cardano blockchain
@@ -19,7 +18,7 @@ api = BlockFrostApi(
 #Official Ada Handle policy ID
 HANDLE_POLICY_ID =  "f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a"
 #Rarities and prices of Ada Handles ( Legendary 1, Ultra Rare 2, Rare 3, Common 4-7, Basic 8-15 )
-HANDLE_RARITIES = { "Legendary": 995, "Ultra Rare": 445, "Rare": 445, "Common": 80, "Basic": 15 }
+HANDLE_RARITIES = { "Legendary": -1, "Ultra Rare": 995, "Rare": 445, "Common": 80, "Basic": 15 }
 
 CNFTJUNGLE_API_URL = "https://api.cnftjungle.app/assets/asset-info/"
 MINSWAP_API_URL = "https://api-mainnet-prod.minswap.org/coinmarketcap/v2/pairs"
@@ -66,7 +65,7 @@ def get_ada_value( valid_stake_address ):
 
     return ada_value
 
-def get_api_rewards_data( valid_stake_address ):
+def get_rewards_data( valid_stake_address ):
     '''Function for geting amount of Rewards and Reward
     info in the wallet of a given valid address'''
     rewards_dict = {}
@@ -87,6 +86,7 @@ def get_api_rewards_data( valid_stake_address ):
     pool_id = api_rewards_data[ "pool_id" ]
 
     pool_info = api.pool_metadata( pool_id, return_type='json' )
+    print(pool_info)
 
     pool_ticker = pool_info[ "ticker" ]
     pool_name = pool_info[ "name" ]
@@ -436,7 +436,7 @@ def summary( request, addr = None ):
     total_value = round( ada_value + token_list_value + nfts_list_value, 2 )
     total_value_using_floor = round( ada_value + token_list_value + nfts_list_value_floor, 2 )
 
-    rewards_dict = get_api_rewards_data( valid_address )
+    rewards_dict = get_rewards_data( valid_address )
 
     total_rewards = round( rewards_dict[ "total_rewards" ], 2 )
     total_withdrawals = round( rewards_dict[ "total_withdrawals" ], 2 )
@@ -497,3 +497,6 @@ def wallet( request, addr = None ):
     }
 
     return render( request, 'tools/wallet_results.html', context )
+
+def faq( request ):
+    return render( request, 'tools/faq.html' )

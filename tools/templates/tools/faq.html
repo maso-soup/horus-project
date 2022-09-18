@@ -1,0 +1,30 @@
+{% extends "tools/base.html" %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+
+<h1 class="display-3 pb-3"> FAQs  </h1>
+
+<div class="container pt-5">
+    <p><b>What does Eye of Horus do?</b></p>
+    <ul>The Summary functionality gives an overview of your Cardano wallet's Ada balance, rewards, NFT values, token values, and total.</ul>
+    <ul>The Wallet functionality allows for a simple and clean view to admire your NFT collections or visualize what assets are in your Cardano wallet</ul>
+
+    <p><b>Why is my wallet taking so long to load?</b></p>
+    <ul>Larger wallets or wallets with NFT collections that have a large circulating supply will take longer to load. This is normal and a result of the NFT rarity API being used</b></ul>
+
+    <p><b>How are NFT rarities and token prices determined?</b></p>
+    <ul>NFT Rarity is determined from CNFTJungle.io and Token prices are determined from Minswap.org, with all values fetched at runtime to provide the most up to date info</ul>
+
+    <p><b>Can I bookmark these pages?</b></p>
+    <ul>Yes! The pages are meant to be bookmarked for easy access, i.e. https://eyeofhorus.io/$eyeofhorus or https://eyeofhorus.io/wallet/$eyeofhorus</ul>
+
+    <p><b>Who do I tell if I see errors or problems with the site?</b></p>
+    <ul>If any errors or incorrect behavior are encountered, please DM @eyeofhorus_io on Twitter</ul>
+
+    <p><b>Why don't all of my NFTs or tokens show up in the value table of the Summary page?</b></p>
+    <ul>In our value calculation for the wallet we exclude any NFTs or tokens with a zero value, which includes NFTs without a known floor price or tokens not listed on Minswap</ul> 
+</div>
+
+    
+{% endblock content %}
