@@ -288,23 +288,23 @@ def nft_request( url, asset ):
         nft_dict[ "asset_value_floor" ] = 7.00
         nft_dict[ "collection_name" ] = "Ada Handle"
 
-        if len( asset_name ) < 2 :
+        if len( asset_name ) - 1  < 2 :
             nft_dict[ "best_trait" ] = "Legendary"
             nft_dict[ "asset_value" ] = -1
 
-        elif len( asset_name ) < 3 :
+        elif len( asset_name ) - 1 < 3 :
             nft_dict[ "best_trait" ] = "Ultra Rare"
             nft_dict[ "asset_value" ] = 995.00
 
-        elif len( asset_name ) < 4 :
+        elif len( asset_name ) - 1 < 4 :
             nft_dict[ "best_trait" ] = "Rare"
             nft_dict[ "asset_value" ] = 445.00
 
-        elif len( asset_name ) < 8 :
+        elif len( asset_name ) - 1 < 8 :
             nft_dict[ "best_trait" ] = "Common"
             nft_dict[ "asset_value" ] = 80.00
 
-        elif len( asset_name ) < 16 :
+        elif len( asset_name ) - 1 < 16 :
             nft_dict[ "best_trait" ] = "Basic"
             nft_dict[ "asset_value" ] = 15.00
 
