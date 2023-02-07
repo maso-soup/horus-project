@@ -23,6 +23,7 @@ HANDLE_RARITIES = { "Legendary": -1, "Ultra Rare": 995, "Rare": 445, "Common": 8
 CNFTJUNGLE_API_URL = "https://api.cnftjungle.app/assets/asset-info/"
 MINSWAP_API_URL = "https://api-mainnet-prod.minswap.org/coinmarketcap/v2/pairs"
 IPFS_API_URL = "https://ipfs.io/ipfs/"
+LIQWID_API_URL = "https://api.liqwiddev.net/graphql"
 
 def validate_address( input_address ):
     '''Function for validating the user input address. Input not matching any
@@ -500,3 +501,98 @@ def wallet( request, addr = None ):
 
 def faq( request ):
     return render( request, 'tools/faq.html' )
+
+def fetch_liqwid_data( supply, collateral, borrow ):
+
+    lq_reward_dist_supply_yearly = 2493750 / 2
+    lq_reward_dist_borrow_yearly = 2493750 / 2
+
+
+    post_payload = {"operationName":"GetStablePrice","variables":{"marketId":"Ada"},"query":"query GetStablePrice($marketId: String!) {\n  market(marketId: $marketId) {\n    ...MarketFragment\n    __typename\n  }\n  marketPrices(marketId: $marketId) {\n    ...AssetPriceFragment\n    __typename\n  }\n}\n\nfragment MarketFragment on Market {\n  asset {\n    icon\n    marketId\n    name\n    __typename\n  }\n  market {\n    ...MarketInfoFragment\n    __typename\n  }\n  marketParams {\n    ...MarketParamsDatumFragment\n    __typename\n  }\n  marketId\n  maxLoanToValue\n  borrowApy\n  supplyApy\n  totalSupply\n  supplyLqDistributionApy\n  borrowLqDistributionApy\n  exchangeRate\n  qTokenId\n  qTokenPolicyId\n  minValue\n  compoundsInAYear\n  __typename\n}\n\nfragment MarketInfoFragment on MarketInfo {\n  params {\n    multiSigStSymbol\n    marketId\n    oracleTokenClass {\n      ...AssetClassFragment\n      __typename\n    }\n    underlyingClass {\n      ...FixedTokenFragment\n      __typename\n    }\n    uniqRef {\n      ...UniqueRefFragment\n      __typename\n    }\n    __typename\n  }\n  scripts {\n    action {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    actionToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    batch {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    batchFinal {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    batchToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    borrowToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    collateralParamsToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    liquidation {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    loan {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    marketParamsToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    marketState {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    marketStateToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    qToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment AssetClassFragment on AssetClass {\n  name\n  symbol\n  __typename\n}\n\nfragment FixedTokenFragment on FixedToken {\n  value0 {\n    ...AssetClassFragment\n    __typename\n  }\n  __typename\n}\n\nfragment UniqueRefFragment on UniqueRef {\n  index\n  transactionId\n  __typename\n}\n\nfragment ScriptPlutusV2Fragment on ScriptPlutusV2 {\n  script {\n    value0\n    value1 {\n      _empty\n      __typename\n    }\n    __typename\n  }\n  hash {\n    ptr\n    __typename\n  }\n  __typename\n}\n\nfragment ScriptMintingPolicyFragment on ScriptMintingPolicy {\n  script {\n    value0 {\n      value0\n      value1 {\n        _empty\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  assetClass {\n    ...AssetClassFragment\n    __typename\n  }\n  __typename\n}\n\nfragment MarketParamsDatumFragment on MarketParamsDatum {\n  actionDistribution\n  actionHash {\n    ...ScriptHashFragment\n    __typename\n  }\n  actionStakeCredentials {\n    value0 {\n      ptr\n      __typename\n    }\n    __typename\n  }\n  batchHash {\n    ...ScriptHashFragment\n    __typename\n  }\n  closeFactor0\n  closeFactor1\n  compoundRate\n  dividendsDatum {\n    value0 {\n      value0\n      __typename\n    }\n    __typename\n  }\n  dividendsValidatorHash {\n    ptr\n    __typename\n  }\n  incomeRatio {\n    treasury\n    suppliers\n    reserve\n    dividends\n    __typename\n  }\n  initialQTokenRate\n  interestModel {\n    baseRate\n    utilMultiplier\n    utilMultiplierJump\n    kink\n    __typename\n  }\n  liquidationThreshold0\n  liquidationThreshold1\n  loanValidatorHash {\n    ...ScriptHashFragment\n    __typename\n  }\n  maxBatchTime\n  maxCollateralAssets\n  maxLTV\n  maxLoan\n  maxTimeWidth\n  minBatchSize\n  minBatchTime\n  minValue\n  numActions\n  treasuryDatum {\n    value0 {\n      value0\n      __typename\n    }\n    __typename\n  }\n  treasuryValidatorHash {\n    ptr\n    __typename\n  }\n  __typename\n}\n\nfragment ScriptHashFragment on ScriptHash {\n  ptr\n  __typename\n}\n\nfragment AssetPriceFragment on AssetPrice {\n  marketId\n  value\n  __typename\n}"}
+    response = requests.post( LIQWID_API_URL, json=post_payload )
+
+    if response.status_code != 200 :
+        return ""
+
+    liqwid_api_data = response.json()
+    borrow_apy = float ( liqwid_api_data[ "data" ][ "market" ][ "borrowApy" ] )
+    supply_apy = float ( liqwid_api_data[ "data" ][ "market" ][ "supplyApy" ] )
+    stake_apy = 0.035
+    qada_exchange_rate = float( liqwid_api_data[ "data" ][ "market" ][ "exchangeRate" ] )
+    liquidity = float ( liqwid_api_data[ "data" ][ "market" ][ "totalSupply" ] ) / 1000000
+
+    total_qada_supplied = float ( api.asset( "a04ce7a52545e5e33c2867e148898d9e667a69602285f6a1298f9d68", return_type='json' )[ 'quantity' ] )
+
+    response = requests.get( MINSWAP_API_URL )
+
+    if response.status_code != 200 :
+        return ""
+
+    response_JSON = response.json()
+
+    token_pair_info = response_JSON[ "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51_lovelace" ]
+    lq_price = float( token_pair_info[ "last_price" ] )
+
+    borrow_daily_apr = ( ( 1 + borrow_apy ) ** (1/365) ) - 1
+    supply_daily_apr = ( ( 1 + supply_apy ) ** (1/365) ) - 1
+    stake_daily_apr = ( ( 1 + stake_apy ) ** (1/365) ) - 1
+
+    print("qada total", total_qada_supplied)
+
+    total_ada_supplied = qada_exchange_rate * ( total_qada_supplied / 1000000 )
+    print("supply total", total_ada_supplied)
+    total_ada_borrowed = total_ada_supplied - liquidity
+    print("borrow total", total_ada_borrowed)
+
+    #ada_supplied = 5000
+    #ada_collateral = 52118
+    #ada_borrowed = 33034
+
+    ada_supplied = supply
+    ada_collateral = collateral
+    ada_borrowed = borrow
+
+    supply_proportion = ada_supplied / total_ada_supplied
+    borrow_proportion = ada_borrowed / total_ada_borrowed
+    print("supply prop", supply_proportion)
+    print("borrow prop", borrow_proportion)
+
+    lq_reward_supply_revenue_daily = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * supply_proportion
+    lq_reward_borrow_revenue_daily = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * borrow_proportion
+    supply_revenue_daily = supply_daily_apr * ( ada_supplied + ada_collateral )
+    stake_revenue_daily = stake_daily_apr * ( ada_supplied + ada_collateral )
+    borrow_interest_daily = borrow_daily_apr * ada_borrowed
+
+    output_data = {
+        "ada_supplied" : ada_supplied,
+        "ada_collateral" : ada_collateral,
+        "ada_borrowed" : ada_borrowed,
+        "lq_reward_supply_revenue_daily" : lq_reward_supply_revenue_daily,
+        "lq_reward_borrow_revenue_daily" : lq_reward_borrow_revenue_daily,
+        "supply_revenue_daily" : supply_revenue_daily,
+        "stake_revenue_daily" : stake_revenue_daily,
+        "borrow_interest_daily" : borrow_interest_daily,
+    }
+
+    return output_data
+
+def liqwid( request ):
+
+    if request.method == 'GET' :
+        return render( request, 'tools/liqwid_home.html' )
+
+    if request.method == 'POST' :
+        try:
+            user_data = request.POST.getlist('data', None)
+            user_supply = float ( user_data[0] )
+            user_collateral = float ( user_data[1] )
+            user_borrow = float ( user_data[2] )
+
+        except ValueError :
+            return render( request, 'tools/liqwid_home.html' )
+
+        liqwid_data = fetch_liqwid_data( user_supply, user_collateral, user_borrow )
+
+        return render( request, 'tools/liqwid_results.html', context=liqwid_data )
+
+    return render( request, 'tools/liqwid_home.html' )

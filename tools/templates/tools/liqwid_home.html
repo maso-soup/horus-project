@@ -1,0 +1,12 @@
+{% extends "tools/base.html" %}
+{% block search %}
+
+<form class="d-flex" method="POST" action="{% url 'liqwid'%}">
+    {% csrf_token %}
+    <input class="form-control me-2" type="input" name="data" placeholder="Enter User Supply." aria-label="Search">
+    <input class="form-control me-2" type="input" name="data" placeholder="Enter User Collateral." aria-label="Search">
+    <input class="form-control me-2" type="input" name="data" placeholder="Enter User Borrowed." aria-label="Seach">
+    <button class="btn btn-outline-success" type="submit">Calculate</button>
+</form>
+
+{% endblock search %}

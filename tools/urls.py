@@ -12,4 +12,6 @@ urlpatterns = [
     path('wallet/<str:addr>', views.wallet, name='wallet-param'),
 
     path('faq/', views.faq, name='faq'),
+
+    path('liqwid/', views.liqwid, name='liqwid'),
 ]
