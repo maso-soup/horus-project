@@ -6,12 +6,24 @@
 <h1 class="display-3 pb-3"> Liqwid Finance Info  </h1>
 
 <div class="container pt-5">
-    <p><b>These are results for {{ ada_supplied | floatformat:2 | intcomma }} Ada in Supply, {{ ada_collateral | floatformat:2 | intcomma }} Ada in Collateral, and {{ ada_borrowed | floatformat:2|intcomma }} Ada Borrowed</b></p>
-    <ul>Current LQ Reward Supply Revenue Daily: {{ lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</ul>
-    <ul>Current LQ Reward Borrow Revenue Daily: {{ lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }}</ul>
-    <ul>Current Supply Revenue Daily: {{ supply_revenue_daily | floatformat:2 | intcomma }}</ul>
-    <ul>Current Stake Revenue Daily: {{ stake_revenue_daily | floatformat:2 | intcomma }}</ul>
-    <ul>Current Borrow Interest Daily: {{ borrow_interest_daily | floatformat:2 | intcomma }}</ul>
+    {% for market in markets_list %}
+        <ul><b>{{ market.market_id }} Market</b></ul>
+        <ul>Supplying daily rate: {{ market.supply_daily_apr | floatformat:3 | intcomma  }}%</ul>
+        <ul>Borrowing daily rate: {{ market.borrow_daily_apr | floatformat:3 | intcomma  }}%</ul>
+        <ul>Staking daily rate: {{ market.stake_daily_apr | floatformat:3 | intcomma  }}%</ul>
+        <ul>Revenue from Supplying: {{ market.supply_revenue_daily | floatformat:2 | intcomma  }} {{ market.market_id }} </ul>
+        <ul>Interest on Borrowing: {{ market.borrow_interest_daily | floatformat:2 | intcomma  }} {{ market.market_id }} </ul>
+        <ul>Revenue from Staking: {{ market.stake_revenue_daily | floatformat:2 | intcomma  }} {{ market.market_id }} </ul>
+        <ul>Total Ada value of the Supplied tokens in this market: {{ market.total_ada_value_supplied | floatformat:2 | intcomma }} Ada</ul>
+        <ul>Total Ada value of the tokens you supplied in this market: {{ market.user_ada_value_supplied | floatformat:2 | intcomma }} Ada</ul>
+        <ul>Total Ada value of the Borrowed tokens in this market: {{ market.total_ada_value_borrowed | floatformat:2 | intcomma }} Ada</ul>
+        <ul>Total Ada value of the tokens you borrowed in this market: {{ market.user_ada_value_borrowed | floatformat:2 | intcomma }} Ada</ul>
+    {% endfor %}
+    <ul><b>Combined Markets</b></ul>
+    <ul>Total Proportion of all Supplied Asset values converted to Ada: {{ supply_proportion | floatformat:7 | intcomma }}%</ul>
+    <ul>Total Proportion of all Borrowed Asset values converted to Ada: {{ borrow_proportion | floatformat:7 | intcomma }}%</ul>
+    <ul>Current LQ Reward Supply Revenue Daily: {{ lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }} (in Ada, assuming LQ is sold at current market price)</ul>
+    <ul>Current LQ Reward Borrow Revenue Daily: {{ lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }} (in Ada, assuming LQ is sold at current market price)</ul>
  
 </div>
     
