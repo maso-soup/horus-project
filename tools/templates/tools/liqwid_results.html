@@ -20,7 +20,7 @@
     <ul>Your Proportion of all Assets Supplied: {{ supply_proportion | floatformat:5 | intcomma }}%</ul>
     <ul>Your Proportion of all Assets Borrowed: {{ borrow_proportion | floatformat:5 | intcomma }}%</ul>
     <ul>LQ Rewards for Supplying: {{ lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }} LQ or {{ lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }} Ada</ul>
-    <ul>LQ Rewards for Borrowing: {{ lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }} LQ {{ lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }} Ada </ul>
+    <ul>LQ Rewards for Borrowing: {{ lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }} LQ or {{ lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }} Ada </ul>
 </div>
     
 {% endblock content %}
