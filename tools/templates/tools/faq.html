@@ -3,7 +3,7 @@
 {% load static %}
 {% block content %}
 
-<h1 class="display-3 pb-3"> FAQs  </h1>
+<h1 class="display-6 pb-3"> FAQs  </h1>
 
 <div class="container pt-5">
     <p><b>What does Eye of Horus do?</b></p>
@@ -23,7 +23,13 @@
     <ul>If any errors or incorrect behavior are encountered, please DM @eyeofhorus_io on Twitter</ul>
 
     <p><b>Why don't all of my NFTs or tokens show up in the value table of the Summary page?</b></p>
-    <ul>In our value calculation for the wallet we exclude any NFTs or tokens with a zero value, which includes NFTs without a known floor price or tokens not listed on Minswap</ul> 
+    <ul>In our value calculation for the wallet we exclude any NFTs or tokens with a zero value, which includes NFTs without a known floor price or tokens not listed on Minswap</ul>
+
+    <p><b>Where does the Liqwid Profit Estimation get it's data and is it live?</b></p>
+    <ul>In our calculation we take user input for the Supply and Borrow balances, price data fetched live from Minswap.org, Liqwid related data live from the Liqwid API, and other token data from Blockfrost</ul> 
+
+    <p><b>How are the Liqwid Profit Estimations calculated and are they accurate?</b></p>
+    <ul>They are calculated using a daily period and the proportion of user balances to the total supply/borrow balances, with all data pulled at the moment of querying from Liqwid API. They are not nearly as precise and accurate as the Liqwid calculations, and serve as a rough estimate on a per day basis. </ul> 
 </div>
 
     
