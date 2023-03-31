@@ -8,3 +8,7 @@ body {
     /* background: #0047b8 */
     background:goldenrod
 }
+
+.markets {
+    display: block;
+}
