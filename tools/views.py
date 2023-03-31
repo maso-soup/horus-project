@@ -583,11 +583,11 @@ def get_liqwid_data( params_list ):
         if market_id != "Ada" :
             token_pair_info = response_JSON[ LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME[ market_id ] + "_lovelace" ]
             token_price = float( token_pair_info[ "last_price" ] )
-            total_ada_value_supplied = total_token_supplied / token_price
-            total_ada_value_borrowed = total_token_borrowed / token_price
+            total_ada_value_supplied = total_token_supplied * token_price
+            total_ada_value_borrowed = total_token_borrowed * token_price
 
-            user_ada_value_supplied = ( user_token_supply ) / token_price
-            user_ada_value_borrowed = ( user_token_borrow ) / token_price
+            user_ada_value_supplied = ( user_token_supply ) * token_price
+            user_ada_value_borrowed = ( user_token_borrow ) * token_price
 
             market_dict[ "stake_daily_apr" ] = 0
             market_dict[ "stake_revenue_daily" ] = 0
