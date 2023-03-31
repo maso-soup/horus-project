@@ -6,11 +6,9 @@
 <form class="d-flex" method="POST" action="{% url 'liqwid'%}">
     {% csrf_token %}
     <div class="markets mx-auto">
-        <input class="form-control my-2" type="input" name="data" placeholder="Enter User Ada Supply." aria-label="Search">
-        <input class="form-control my-2" type="input" name="data" placeholder="Enter User Ada Collateral." aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Enter User Ada Supply Balance." aria-label="Search">
         <input class="form-control my-2" type="input" name="data" placeholder="Enter User Ada Borrowed." aria-label="Seach">
-        <input class="form-control my-2" type="input" name="data" placeholder="Enter User Djed Supply." aria-label="Search">
-        <input class="form-control my-2" type="input" name="data" placeholder="Enter User Djed Collateral." aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Enter User Djed Supply Balance." aria-label="Search">
         <input class="form-control my-2" type="input" name="data" placeholder="Enter User Djed Borrowed." aria-label="Seach">
         <button class="btn btn-outline-success" type="submit">Calculate</button>
     </div>

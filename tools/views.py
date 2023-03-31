@@ -539,10 +539,9 @@ def get_liqwid_data( params_list ):
         market_dict = {}
 
         user_token_supply = params_list[ param_counter ]
-        user_token_collateral = params_list[ param_counter + 1 ]
-        user_token_borrow = params_list[ param_counter + 2 ]
+        user_token_borrow = params_list[ param_counter + 1 ]
 
-        param_counter += 3
+        param_counter += 2
 
         market_id = market[ "marketId" ]
         print(market_id)
@@ -560,7 +559,7 @@ def get_liqwid_data( params_list ):
         market_dict[ "borrow_daily_apr" ] = borrow_daily_apr * 100
         market_dict[ "supply_daily_apr" ] = supply_daily_apr * 100
 
-        supply_revenue_daily = supply_daily_apr * ( user_token_supply + user_token_collateral )
+        supply_revenue_daily = supply_daily_apr * ( user_token_supply )
         borrow_interest_daily = borrow_daily_apr * user_token_borrow
 
         market_dict[ "supply_revenue_daily" ] = supply_revenue_daily
@@ -572,11 +571,11 @@ def get_liqwid_data( params_list ):
         total_ada_value_supplied = total_token_supplied
         total_ada_value_borrowed = total_token_borrowed
 
-        user_ada_value_supplied = user_token_supply + user_token_collateral
+        user_ada_value_supplied = user_token_supply
         user_ada_value_borrowed = user_token_borrow
 
         market_dict[ "stake_daily_apr" ] = ( stake_daily_apr * 100 ) * ( token_liquidity / total_token_supplied  )
-        stake_revenue_daily = stake_daily_apr * ( user_token_supply + user_token_collateral )
+        stake_revenue_daily = stake_daily_apr * ( user_token_supply )
         market_dict[ "stake_revenue_daily" ] = stake_revenue_daily
 
         token_price = 1
@@ -587,7 +586,7 @@ def get_liqwid_data( params_list ):
             total_ada_value_supplied = total_token_supplied / token_price
             total_ada_value_borrowed = total_token_borrowed / token_price
 
-            user_ada_value_supplied = ( user_token_supply + user_token_collateral ) / token_price
+            user_ada_value_supplied = ( user_token_supply ) / token_price
             user_ada_value_borrowed = ( user_token_borrow ) / token_price
 
             market_dict[ "stake_daily_apr" ] = 0
