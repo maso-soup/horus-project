@@ -1,7 +1,7 @@
 {% extends "tools/base.html" %}
 {% block search %}
 
-<p class="display-6 pb-3"> Estimate Your Daily Liqwid Rewards</p>
+<p class="display-6 pb-3"> Estimate Liqwid Rewards</p>
 
 <form class="d-flex" method="POST" action="{% url 'liqwid'%}">
     {% csrf_token %}
