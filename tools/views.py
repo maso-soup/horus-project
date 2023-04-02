@@ -577,10 +577,10 @@ def get_liqwid_data( params_list ):
         fold_borrow_interest_daily = borrow_daily_apr * fold_user_token_borrow
 
         market_dict[ "supply_revenue_daily" ] = supply_revenue_daily
-        market_dict[ "borrow_interest_daily" ] = borrow_interest_daily
+        market_dict[ "borrow_interest_daily" ] = -borrow_interest_daily
         market_dict[ "net_supply_revenue_daily" ] = net_supply_revenue_daily
         market_dict[ "fold_supply_revenue_daily" ] = fold_supply_revenue_daily
-        market_dict[ "fold_borrow_interest_daily" ] = fold_borrow_interest_daily
+        market_dict[ "fold_borrow_interest_daily" ] = -fold_borrow_interest_daily
 
         total_token_supplied = qtoken_exchange_rate * ( total_qtoken_supplied / 1000000 )
         total_token_borrowed = total_token_supplied - token_liquidity
