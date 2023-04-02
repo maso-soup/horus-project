@@ -531,6 +531,8 @@ def get_liqwid_data( params_list ):
     lq_price = float( token_pair_info[ "last_price" ] )
 
     stake_apy = 0.035
+    ltv_ratio = 0.70
+    folds = 7
 
     param_counter = 0
 
@@ -543,8 +545,17 @@ def get_liqwid_data( params_list ):
 
         param_counter += 2
 
+        net_user_token_supply = user_token_supply - user_token_borrow
+        fold_user_token_supply = net_user_token_supply
+        fold_user_token_borrow = 0
+        base_fold_user_token_supply = net_user_token_supply
+
+        for i in range( 0, folds ):
+            base_fold_user_token_supply = base_fold_user_token_supply * ltv_ratio
+            fold_user_token_supply += ( base_fold_user_token_supply )
+            fold_user_token_borrow += ( base_fold_user_token_supply )
+
         market_id = market[ "marketId" ]
-        print(market_id)
         market_dict[ "market_id" ] = market_id
         
         qtoken_exchange_rate = float( market[ "exchangeRate" ] )
@@ -561,9 +572,15 @@ def get_liqwid_data( params_list ):
 
         supply_revenue_daily = supply_daily_apr * ( user_token_supply )
         borrow_interest_daily = borrow_daily_apr * user_token_borrow
+        net_supply_revenue_daily = supply_daily_apr * ( net_user_token_supply )
+        fold_supply_revenue_daily = supply_daily_apr * ( fold_user_token_supply )
+        fold_borrow_interest_daily = borrow_daily_apr * fold_user_token_borrow
 
         market_dict[ "supply_revenue_daily" ] = supply_revenue_daily
         market_dict[ "borrow_interest_daily" ] = borrow_interest_daily
+        market_dict[ "net_supply_revenue_daily" ] = net_supply_revenue_daily
+        market_dict[ "fold_supply_revenue_daily" ] = fold_supply_revenue_daily
+        market_dict[ "fold_borrow_interest_daily" ] = fold_borrow_interest_daily
 
         total_token_supplied = qtoken_exchange_rate * ( total_qtoken_supplied / 1000000 )
         total_token_borrowed = total_token_supplied - token_liquidity
@@ -573,10 +590,18 @@ def get_liqwid_data( params_list ):
 
         user_ada_value_supplied = user_token_supply
         user_ada_value_borrowed = user_token_borrow
+        net_user_ada_value_supplied = net_user_token_supply
+        fold_user_ada_value_supplied = fold_user_token_supply
+        fold_user_ada_value_borrowed = fold_user_token_borrow
 
         market_dict[ "stake_daily_apr" ] = ( stake_daily_apr * 100 ) * ( token_liquidity / total_token_supplied  )
         stake_revenue_daily = stake_daily_apr * ( user_token_supply )
+        net_stake_revenue_daily = stake_daily_apr * ( net_user_token_supply )
+        fold_stake_revenue_daily = stake_daily_apr * ( fold_user_token_supply )
+        
         market_dict[ "stake_revenue_daily" ] = stake_revenue_daily
+        market_dict[ "net_stake_revenue_daily" ] = net_stake_revenue_daily
+        market_dict[ "fold_stake_revenue_daily" ] = fold_stake_revenue_daily
 
         token_price = 1
 
@@ -588,9 +613,14 @@ def get_liqwid_data( params_list ):
 
             user_ada_value_supplied = ( user_token_supply ) * token_price
             user_ada_value_borrowed = ( user_token_borrow ) * token_price
+            net_user_ada_value_supplied = ( net_user_token_supply ) * token_price
+            fold_user_ada_value_supplied = ( fold_user_token_supply ) * token_price
+            fold_user_ada_value_borrowed = ( fold_user_token_borrow ) * token_price
 
             market_dict[ "stake_daily_apr" ] = 0
             market_dict[ "stake_revenue_daily" ] = 0
+            market_dict[ "net_stake_revenue_daily" ] = 0
+            market_dict[ "fold_stake_revenue_daily" ] = 0
 
         market_dict[ "token_price" ] = token_price
 
@@ -598,6 +628,9 @@ def get_liqwid_data( params_list ):
         market_dict[ "total_ada_value_borrowed" ] = total_ada_value_borrowed
         market_dict[ "user_ada_value_supplied" ] = user_ada_value_supplied
         market_dict[ "user_ada_value_borrowed" ] = user_ada_value_borrowed
+        market_dict[ "net_user_ada_value_supplied" ] = net_user_ada_value_supplied
+        market_dict[ "fold_user_ada_value_supplied" ] = fold_user_ada_value_supplied
+        market_dict[ "fold_user_ada_value_borrowed" ] = fold_user_ada_value_borrowed
 
         markets_list.append( market_dict )
 
@@ -605,21 +638,36 @@ def get_liqwid_data( params_list ):
     combined_total_ada_value_borrowed = 0
     combined_user_ada_value_supplied = 0
     combined_user_ada_value_borrowed = 0
+    combined_net_user_ada_value_supplied = 0
+    combined_fold_user_ada_value_supplied = 0
+    combined_fold_user_ada_value_borrowed = 0
 
     for market in markets_list:
         combined_total_ada_value_supplied += market[ "total_ada_value_supplied" ]
         combined_total_ada_value_borrowed += market[ "total_ada_value_borrowed" ]
         combined_user_ada_value_supplied += market[ "user_ada_value_supplied" ]
         combined_user_ada_value_borrowed += market[ "user_ada_value_borrowed" ]
+        combined_net_user_ada_value_supplied += market[ "net_user_ada_value_supplied" ]
+        combined_fold_user_ada_value_supplied += market[ "fold_user_ada_value_supplied" ]
+        combined_fold_user_ada_value_borrowed += market[ "fold_user_ada_value_borrowed" ]
 
     supply_proportion = combined_user_ada_value_supplied / combined_total_ada_value_supplied
     borrow_proportion = combined_user_ada_value_borrowed / combined_total_ada_value_borrowed
+    net_supply_proportion = combined_net_user_ada_value_supplied / combined_total_ada_value_supplied
+    fold_supply_proportion = combined_fold_user_ada_value_supplied / combined_total_ada_value_supplied
+    fold_borrow_proportion = combined_fold_user_ada_value_borrowed / combined_total_ada_value_borrowed
 
     lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * supply_proportion
     lq_reward_borrow_revenue_daily = ( lq_reward_dist_borrow_yearly / 365 ) * borrow_proportion
+    net_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * net_supply_proportion
+    fold_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * fold_supply_proportion
+    fold_lq_reward_borrow_revenue_daily = ( lq_reward_dist_borrow_yearly / 365 ) * fold_borrow_proportion
 
     lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * supply_proportion
     lq_reward_borrow_revenue_daily_ada_value = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * borrow_proportion
+    net_lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * net_supply_proportion
+    fold_lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * fold_supply_proportion
+    fold_lq_reward_borrow_revenue_daily_ada_value = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * fold_borrow_proportion
 
     output_data = {
         "markets_list" : markets_list,
@@ -627,8 +675,14 @@ def get_liqwid_data( params_list ):
         "borrow_proportion" : borrow_proportion * 100,
         "lq_reward_supply_revenue_daily" : lq_reward_supply_revenue_daily,
         "lq_reward_borrow_revenue_daily" : lq_reward_borrow_revenue_daily,
+        "net_lq_reward_supply_revenue_daily" : net_lq_reward_supply_revenue_daily,
+        "fold_lq_reward_supply_revenue_daily" : fold_lq_reward_supply_revenue_daily,
+        "fold_lq_reward_borrow_revenue_daily" : fold_lq_reward_borrow_revenue_daily,
         "lq_reward_supply_revenue_daily_ada_value" : lq_reward_supply_revenue_daily_ada_value,
         "lq_reward_borrow_revenue_daily_ada_value" : lq_reward_borrow_revenue_daily_ada_value,
+        "net_lq_reward_supply_revenue_daily_ada_value" : net_lq_reward_supply_revenue_daily_ada_value,
+        "fold_lq_reward_supply_revenue_daily_ada_value" : fold_lq_reward_supply_revenue_daily_ada_value,
+        "fold_lq_reward_borrow_revenue_daily_ada_value" : fold_lq_reward_borrow_revenue_daily_ada_value,
     }
 
     return output_data
@@ -641,8 +695,7 @@ def liqwid( request ):
     if request.method == 'POST' :
         try:
             user_data = request.POST.getlist('data', None)
-            user_data_with_defaults = [ d if d != "" else 0 for d in user_data ]
-            data_list = list( map( float, user_data_with_defaults ) )
+            data_list = [ float( d ) if d != "" else 0.0 for d in user_data ]
 
         except ValueError :
             return render( request, 'tools/liqwid_home.html' )

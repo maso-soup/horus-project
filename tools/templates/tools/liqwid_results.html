@@ -1,26 +1,336 @@
 {% extends "tools/base.html" %}
 {% load humanize %}
+{% load mathfilters %}
 {% load static %}
 {% block content %}
 
-<p class="display-6 pb-3"> Estimated Daily Liqwid Profits</p>
+<p class="display-6 pb-3">Estimated Daily Liqwid Rewards</p>
 
-<div class="container pt-5">
-    {% for market in markets_list %}
-    <b><p">{{ market.market_id }} Market</p></b>
-
-        <ul>Supply: Earning {{ market.supply_revenue_daily | floatformat:2 | intcomma  }} {{ market.market_id }} at daily rate of {{ market.supply_daily_apr | floatformat:3 | intcomma  }}%</ul>
-        <ul>Borrow: Paying {{ market.borrow_interest_daily | floatformat:2 | intcomma  }} {{ market.market_id }} at daily rate of {{ market.borrow_daily_apr | floatformat:3 | intcomma  }}%</ul>
-        <ul>Staking: Earning {{ market.stake_revenue_daily | floatformat:2 | intcomma  }} {{ market.market_id }} at daily rate of {{ market.stake_daily_apr | floatformat:3 | intcomma  }}%</ul>
-
-        <ul>Currently Supplying {{ market.user_ada_value_supplied | floatformat:2 | intcomma }} of {{ market.total_ada_value_supplied | floatformat:2 | intcomma }} of the total Ada value in this market</ul>
-        <ul>Currently Borrowing {{ market.user_ada_value_borrowed | floatformat:2 | intcomma }} of {{ market.total_ada_value_borrowed | floatformat:2 | intcomma }} of the total Ada value in this market</ul>
-    {% endfor %}
-    <b><p>Combined Markets</p></b>
-    <ul>Your Proportion of all Assets Supplied: {{ supply_proportion | floatformat:5 | intcomma }}%</ul>
-    <ul>Your Proportion of all Assets Borrowed: {{ borrow_proportion | floatformat:5 | intcomma }}%</ul>
-    <ul>LQ Rewards for Supplying: {{ lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }} LQ or {{ lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }} Ada</ul>
-    <ul>LQ Rewards for Borrowing: {{ lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }} LQ or {{ lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }} Ada </ul>
+<div class="container">
+    <div class="row">
+        <p><b>Current Strategy</b></p>
+        <div class="col">
+            <b>Daily</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Market</th>
+                            <th scope="col">Supply</th>
+                            <th scope="col">Borrow</th>
+                            <th scope="col">Stake</th>
+                        </tr>
+                    </thead>
+                    {% for market in markets_list %}
+                        <tbody>
+                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
+                            <td>{{ market.supply_revenue_daily | floatformat:2 | intcomma  }} </td> 
+                            <td>{{ market.borrow_interest_daily | floatformat:2 | intcomma  }}</td>
+                            <td>{{ market.stake_revenue_daily | floatformat:2 | intcomma  }}</td>
+                        </tbody>
+                    {% endfor %}
+                        <tbody>
+                            <th>Total (LQ)</th>
+                            <td>{{ lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
+                            <td>{{ lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Total (Ada)</th>
+                            <td>{{ lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
+                            <td>{{ lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col">
+            <b>Weekly</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Market</th>
+                            <th scope="col">Supply</th>
+                            <th scope="col">Borrow</th>
+                            <th scope="col">Stake</th>
+                        </tr>
+                    </thead>
+                    {% for market in markets_list %}
+                        <tbody>
+                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
+                            <td>{{ market.supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }} </td> 
+                            <td>{{ market.borrow_interest_daily |mul:7 | floatformat:2 | intcomma  }}</td>
+                            <td>{{ market.stake_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td>
+                        </tbody>
+                    {% endfor %}
+                    <tbody>
+                        <th>Total (LQ)</th>
+                        <td>{{ lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
+                        <td>{{ lq_reward_borrow_revenue_daily |mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>N/A</td>
+                    </tbody>
+                    <tbody>
+                        <th>Total (Ada)</th>
+                        <td>{{ lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td>
+                        <td>{{ lq_reward_borrow_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>N/A</td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col">
+            <b>Monthly</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Market</th>
+                            <th scope="col">Supply</th>
+                            <th scope="col">Borrow</th>
+                            <th scope="col">Stake</th>
+                        </tr>
+                    </thead>
+                    {% for market in markets_list %}
+                        <tbody>
+                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
+                            <td>{{ market.supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }} </td> 
+                            <td>{{ market.borrow_interest_daily |mul:30 | floatformat:2 | intcomma  }}</td>
+                            <td>{{ market.stake_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td>
+                        </tbody>
+                    {% endfor %}
+                        <tbody>
+                            <th>Total (LQ)</th>
+                            <td>{{ lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td> 
+                            <td>{{ lq_reward_borrow_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Total (Ada)</th>
+                            <td>{{ lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma  }}</td>
+                            <td>{{ lq_reward_borrow_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <p><b>Supply Only Strategy</b></p>
+        <div class="col">
+            <b>Daily</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Market</th>
+                            <th scope="col">Supply</th>
+                            <th scope="col">Borrow</th>
+                            <th scope="col">Stake</th>
+                        </tr>
+                    </thead>
+                    {% for market in markets_list %}
+                        <tbody>
+                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
+                            <td>{{ market.net_supply_revenue_daily | floatformat:2 | intcomma  }} </td> 
+                            <td>N/A</td>
+                            <td>{{ market.net_stake_revenue_daily | floatformat:2 | intcomma  }}</td>
+                        </tbody>
+                    {% endfor %}
+                        <tbody>
+                            <th>Total (LQ)</th>
+                            <td>{{ net_lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
+                            <td>N/A</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Total (Ada)</th>
+                            <td>{{ net_lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
+                            <td>N/A</td>
+                            <td>N/A</td>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col">
+            <b>Weekly</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Market</th>
+                            <th scope="col">Supply</th>
+                            <th scope="col">Borrow</th>
+                            <th scope="col">Stake</th>
+                        </tr>
+                    </thead>
+                    {% for market in markets_list %}
+                        <tbody>
+                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
+                            <td>{{ market.net_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }} </td> 
+                            <td>N/A</td>
+                            <td>{{ market.net_stake_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td>
+                        </tbody>
+                    {% endfor %}
+                    <tbody>
+                        <th>Total (LQ)</th>
+                        <td>{{ net_lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
+                        <td>N/A</td>
+                        <td>N/A</td>
+                    </tbody>
+                    <tbody>
+                        <th>Total (Ada)</th>
+                        <td>{{ net_lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td> 
+                        <td>N/A</td>
+                        <td>N/A</td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col">
+            <b>Monthly</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Market</th>
+                            <th scope="col">Supply</th>
+                            <th scope="col">Borrow</th>
+                            <th scope="col">Stake</th>
+                        </tr>
+                    </thead>
+                    {% for market in markets_list %}
+                        <tbody>
+                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
+                            <td>{{ market.net_supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }} </td> 
+                            <td>N/A</td>
+                            <td>{{ market.stake_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td>
+                        </tbody>
+                    {% endfor %}
+                        <tbody>
+                            <th>Total (LQ)</th>
+                            <td>{{ net_lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td> 
+                            <td>N/A</td>
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Total (Ada)</th>
+                            <td>{{ net_lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma  }}</td>
+                            <td>N/A</td>
+                            <td>N/A</td>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <p><b>Multi-Fold Strategy (70% LTV, 7 Folds)</b></p>
+        <div class="col">
+            <b>Daily</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Market</th>
+                            <th scope="col">Supply</th>
+                            <th scope="col">Borrow</th>
+                            <th scope="col">Stake</th>
+                        </tr>
+                    </thead>
+                    {% for market in markets_list %}
+                        <tbody>
+                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
+                            <td>{{ market.fold_supply_revenue_daily | floatformat:2 | intcomma  }} </td> 
+                            <td>{{ market.fold_borrow_interest_daily | floatformat:2 | intcomma  }}</td>
+                            <td>{{ market.fold_stake_revenue_daily | floatformat:2 | intcomma  }}</td>
+                        </tbody>
+                    {% endfor %}
+                        <tbody>
+                            <th>Total (LQ)</th>
+                            <td>{{ fold_lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
+                            <td>{{ fold_lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Total (Ada)</th>
+                            <td>{{ fold_lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
+                            <td>{{ fold_lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col">
+            <b>Weekly</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Market</th>
+                            <th scope="col">Supply</th>
+                            <th scope="col">Borrow</th>
+                            <th scope="col">Stake</th>
+                        </tr>
+                    </thead>
+                    {% for market in markets_list %}
+                        <tbody>
+                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
+                            <td>{{ market.fold_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }} </td> 
+                            <td>{{ market.fold_borrow_interest_daily |mul:7 | floatformat:2 | intcomma  }}</td>
+                            <td>{{ market.fold_stake_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td>
+                        </tbody>
+                    {% endfor %}
+                    <tbody>
+                        <th>Total (LQ)</th>
+                        <td>{{ fold_lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
+                        <td>{{ fold_lq_reward_borrow_revenue_daily |mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>N/A</td>
+                    </tbody>
+                    <tbody>
+                        <th>Total (Ada)</th>
+                        <td>{{ fold_lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td>
+                        <td>{{ fold_lq_reward_borrow_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>N/A</td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col">
+            <b>Monthly</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Market</th>
+                            <th scope="col">Supply</th>
+                            <th scope="col">Borrow</th>
+                            <th scope="col">Stake</th>
+                        </tr>
+                    </thead>
+                    {% for market in markets_list %}
+                        <tbody>
+                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
+                            <td>{{ market.fold_supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }} </td> 
+                            <td>{{ market.fold_borrow_interest_daily |mul:30 | floatformat:2 | intcomma  }}</td>
+                            <td>{{ market.fold_stake_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td>
+                        </tbody>
+                    {% endfor %}
+                        <tbody>
+                            <th>Total (LQ)</th>
+                            <td>{{ fold_lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td> 
+                            <td>{{ fold_lq_reward_borrow_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Total (Ada)</th>
+                            <td>{{ fold_lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma  }}</td>
+                            <td>{{ fold_lq_reward_borrow_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-    
+
 {% endblock content %}

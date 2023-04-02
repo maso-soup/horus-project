@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tools.apps.ToolsConfig',
     'django.contrib.humanize',
+    'mathfilters',
 ]
 
 MIDDLEWARE = [

@@ -47,28 +47,28 @@
         </thead>
         <tbody>
             <tr>
-            <td><img src="{% static 'tools/cardano-logo-gold.png' %}" width="50rem" height="50rem" class="rounded" alt="img"></td>
-            <th scope="row">Ada</th>
-            <td>Ada</td>
-            <td>{{ ada_value | intcomma  }}</td>
-            <td>Cardano's native token.</td>
+                <td><img src="{% static 'tools/cardano-logo-gold.png' %}" width="50rem" height="50rem" class="rounded" alt="img"></td>
+                <th scope="row">Ada</th>
+                <td>Ada</td>
+                <td>{{ ada_value | intcomma  }}</td>
+                <td>Cardano's native token.</td>
             </tr>
             {% for token in token_list %}
                 <tr>
-                <td><img src="{{ token.asset_img_link }}" loading="lazy" width="50rem" height="50rem" class="rounded" alt="img"></td>
-                <th scope="row">{{ token.asset_name }}</th>
-                <td>{{ token.asset_ticker }}</td>
-                <td>{{ token.asset_value | intcomma  }}</td>
-                <td>Current price: {{ token.asset_price | intcomma  }}</td>
+                    <td><img src="{{ token.asset_img_link }}" loading="lazy" width="50rem" height="50rem" class="rounded" alt="img"></td>
+                    <th scope="row">{{ token.asset_name }}</th>
+                    <td>{{ token.asset_ticker }}</td>
+                    <td>{{ token.asset_value | intcomma  }}</td>
+                    <td>Current price: {{ token.asset_price | intcomma  }}</td>
                 </tr>
             {% endfor %}
             {% for nft in nfts_list %}
                 <tr>
-                <td><img src="{{ nft.asset_img_link }}" loading="lazy" width="50rem" height="50rem" class="rounded" alt="img"></td>
-                <th scope="row">{{ nft.collection_name }}</th>
-                <td>{{ nft.asset_name }}</td>
-                <td>{{ nft.asset_value | intcomma  }}</td>
-                <td>Rarest trait is {{ nft.best_trait }}.</td>
+                    <td><img src="{{ nft.asset_img_link }}" loading="lazy" width="50rem" height="50rem" class="rounded" alt="img"></td>
+                    <th scope="row">{{ nft.collection_name }}</th>
+                    <td>{{ nft.asset_name }}</td>
+                    <td>{{ nft.asset_value | intcomma  }}</td>
+                    <td>Rarest trait is {{ nft.best_trait }}.</td>
                 </tr>
             {% endfor %}
 
