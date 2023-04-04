@@ -204,7 +204,7 @@
                             <th>{{ market.market_id }} ({{ market.market_id }})</th>
                             <td>{{ market.net_supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }} </td> 
                             <td>N/A</td>
-                            <td>{{ market.stake_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td>
+                            <td>{{ market.net_stake_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td>
                         </tbody>
                     {% endfor %}
                         <tbody>

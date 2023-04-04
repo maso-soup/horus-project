@@ -1,7 +1,10 @@
 from django.urls import path
+from django.contrib import admin
 from . import views
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
+
     path('', views.summary, name='home'),
     path('<str:addr>', views.summary, name='home-param'),
 
