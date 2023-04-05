@@ -538,13 +538,19 @@ def get_liqwid_data( params_list ):
     lq_price = float( token_pair_info[ "last_price" ] )
     
     user_staked_lq = params_list[0] / lq_price
-    total_staked_lq = 100000
+    staked_lq_address = api.address( "addr1w8arvq7j9qlrmt0wpdvpp7h4jr4fmfk8l653p9t907v2nsss7w7r4", return_type='json' )
+    #add user's possible amount to total
+    total_staked_lq = user_staked_lq
+    
+    for a in staked_lq_address[ "amount" ]:
+        if a[ "unit" ] == "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" :
+            total_staked_lq += float( a[ "quantity" ] ) / 1000000
+
     user_staked_lq_proprotion = user_staked_lq / total_staked_lq
 
     stake_apy = 0.0305
     ltv_ratio = 0.7
     folds = 7
-    fold_reward_penalty = 1
 
     param_counter = 0
 
@@ -575,7 +581,7 @@ def get_liqwid_data( params_list ):
         utilization = float( market[ "utilization" ] )
         token_liquidity = float ( market [ "totalSupply" ] ) / 1000000
 
-        #total_qtoken_supplied = float ( api.asset( market[ "qTokenPolicyId" ], return_type='json' )[ 'quantity' ] )
+        #total_qtoken_supplied = float ( api.asset( market[ "qTokenPolicyId" ], return_type='json' )[ 'quantity' ] ) 
 
         borrow_daily_apr = ( ( 1 + float( market[ "borrowApy" ] ) ) ** ( 1/365 ) ) - 1
         supply_daily_apr = ( ( 1 + float( market[ "supplyApy" ] ) ) ** ( 1/365 ) ) - 1
@@ -586,8 +592,8 @@ def get_liqwid_data( params_list ):
 
         supply_revenue_daily = supply_daily_apr * user_token_supply
         #borrow_interest_daily = borrow_daily_apr * user_token_borrow
-        only_supply_revenue_daily = supply_daily_apr * ( only_user_token_supply )
-        fold_supply_revenue_daily = supply_daily_apr * ( fold_user_token_supply )
+        only_supply_revenue_daily = supply_daily_apr * only_user_token_supply
+        fold_supply_revenue_daily = supply_daily_apr * fold_user_token_supply
         fold_borrow_interest_daily = borrow_daily_apr * fold_user_token_borrow
 
         market_dict[ "supply_revenue_daily" ] = supply_revenue_daily
@@ -599,9 +605,6 @@ def get_liqwid_data( params_list ):
         #total_token_supplied = qtoken_exchange_rate * ( total_qtoken_supplied / 1000000 )
         total_token_supplied = token_liquidity / ( 1 - utilization )
         total_token_borrowed = total_token_supplied * utilization
-
-        print(total_token_supplied)
-        print(total_token_borrowed)
 
         total_ada_value_supplied = total_token_supplied
         total_ada_value_borrowed = total_token_borrowed
@@ -696,14 +699,14 @@ def get_liqwid_data( params_list ):
     lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * supply_proportion
     #lq_reward_borrow_revenue_daily = ( lq_reward_dist_borrow_yearly / 365 ) * borrow_proportion
     only_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * only_supply_proportion
-    fold_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * fold_supply_proportion * fold_reward_penalty
-    fold_lq_reward_borrow_revenue_daily = ( lq_reward_dist_borrow_yearly / 365 ) * fold_borrow_proportion * fold_reward_penalty
+    fold_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * fold_supply_proportion
+    fold_lq_reward_borrow_revenue_daily = ( lq_reward_dist_borrow_yearly / 365 ) * fold_borrow_proportion
 
     lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * supply_proportion
     #lq_reward_borrow_revenue_daily_ada_value = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * borrow_proportion
     only_lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * only_supply_proportion
-    fold_lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * fold_supply_proportion * fold_reward_penalty
-    fold_lq_reward_borrow_revenue_daily_ada_value = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * fold_borrow_proportion * fold_reward_penalty
+    fold_lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * fold_supply_proportion
+    fold_lq_reward_borrow_revenue_daily_ada_value = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * fold_borrow_proportion
 
     output_data = {
         "markets_list" : markets_list,
