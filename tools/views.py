@@ -25,7 +25,7 @@ MINSWAP_API_URL = "https://api-mainnet-prod.minswap.org/coinmarketcap/v2/pairs"
 IPFS_API_URL = "https://ipfs.io/ipfs/"
 LIQWID_API_URL = "https://api.liqwiddev.net/graphql"
 
-LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME = {"DJED":"8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd61446a65644d6963726f555344"}
+LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME = {"DJED":"8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd61446a65644d6963726f555344", "SHEN":"8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd615368656e4d6963726f555344"}
 
 def validate_address( input_address ):
     '''Function for validating the user input address. Input not matching any
@@ -636,6 +636,9 @@ def get_liqwid_data( params_list ):
         if market_id != "Ada" :
             token_pair_info = response_JSON[ LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME[ market_id ] + "_lovelace" ]
             token_price = float( token_pair_info[ "last_price" ] )
+
+            print(token_price)
+
             total_ada_value_supplied = total_token_supplied * token_price
             total_ada_value_borrowed = total_token_borrowed * token_price
 
