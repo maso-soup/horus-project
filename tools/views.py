@@ -689,7 +689,7 @@ def get_liqwid_data( params_list ):
         market_data_dict = get_optimal_market_data( user_token_supply, market, stake_apy, ltv_ratio, folds, lq_staking_details[ "user_staked_lq_proportion" ] )
         param_counter += 1
 
-        markets_list.append( market_data_dict, lq_staking_details[ "user_staked_lq_proportion" ] )
+        markets_list.append( market_data_dict )
 
     lq_rewards = calculate_lq_rewards( markets_list, lq_staking_details[ "user_staked_lq_proportion" ] )
 
