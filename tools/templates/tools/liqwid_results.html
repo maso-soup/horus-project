@@ -414,6 +414,111 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <p><b>Aquafarmer Boost to LQ Staking</b></p>
+        <div class="col">
+            <b>Daily</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">AF Boost</th>
+                            <th scope="col">Revenue (Ada)</th>
+                            <th scope="col">Boost (Ada)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <th>2%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.02 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.02 | floatformat:2 | intcomma }}</td>
+                    </tbody>
+                    <tbody>
+                        <th>3%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.03 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.03 | floatformat:2 | intcomma }}</td>
+                    </tbody>
+                    <tbody>
+                        <th>4%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.04 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.04 | floatformat:2 | intcomma }}</td>
+                    </tbody>
+                    <tbody>
+                        <th>5%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.05 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.05 | floatformat:2 | intcomma }}</td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col">
+            <b>Weekly</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">AF Boost</th>
+                            <th scope="col">New Revenue (Ada)</th>
+                            <th scope="col">Boost (Ada)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <th>2%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.02 | mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.02 | mul:7 | floatformat:2 | intcomma}}</td>
+                    </tbody>
+                    <tbody>
+                        <th>3%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.03 | mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.03 | mul:7 | floatformat:2 | intcomma}}</td>
+                    </tbody>
+                    <tbody>
+                        <th>4%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.04 | mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.04 | mul:7 | floatformat:2 | intcomma}}</td>
+                    </tbody>
+                    <tbody>
+                        <th>5%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.05 | mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.05 | mul:7 | floatformat:2 | intcomma}}</td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col">
+            <b>Monthly</b>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">AF Boost</th>
+                            <th scope="col">New Revenue (Ada)</th>
+                            <th scope="col">Boost (Ada)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <th>2%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.02 | mul:30 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.02 | mul:30 | floatformat:2 | intcomma}}</td>
+                    </tbody>
+                    <tbody>
+                        <th>3%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.03 | mul:30 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.03 | mul:30 | floatformat:2 | intcomma}}</td>
+                    </tbody>
+                    <tbody>
+                        <th>4%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.04 | mul:30 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.04 | mul:30 | floatformat:2 | intcomma}}</td>
+                    </tbody>
+                    <tbody>
+                        <th>5%</th>
+                        <td>{{ user_protocol_revenue_ada_value |mul:1.05 | mul:30 | floatformat:2 | intcomma }}</td>
+                        <td>{{ user_protocol_revenue_ada_value |mul:0.05 | mul:30 | floatformat:2 | intcomma}}</td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock content %}

@@ -637,8 +637,6 @@ def get_liqwid_data( params_list ):
             token_pair_info = response_JSON[ LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME[ market_id ] + "_lovelace" ]
             token_price = float( token_pair_info[ "last_price" ] )
 
-            print(token_price)
-
             total_ada_value_supplied = total_token_supplied * token_price
             total_ada_value_borrowed = total_token_borrowed * token_price
 
@@ -665,6 +663,10 @@ def get_liqwid_data( params_list ):
         market_dict[ "fold_user_ada_value_supplied" ] = fold_user_ada_value_supplied
         market_dict[ "fold_user_ada_value_borrowed" ] = fold_user_ada_value_borrowed
 
+        market_dict[ "only_user_ada_value_supplied_int_gen" ] = only_user_ada_value_supplied * supply_daily_apr
+        market_dict[ "fold_user_ada_value_supplied_int_gen" ] = fold_user_ada_value_supplied * supply_daily_apr
+        market_dict[ "fold_user_ada_value_borrowed_int_gen" ] = fold_user_ada_value_borrowed * borrow_daily_apr
+
         market_dict[ "total_market_revenue_ada_value_daily" ] = total_market_revenue_ada_value_daily
         market_dict[ "user_market_revenue_ada_value_daily" ] = total_market_revenue_ada_value_daily * user_staked_lq_proprotion
 
@@ -678,6 +680,9 @@ def get_liqwid_data( params_list ):
     combined_fold_user_ada_value_supplied = 0
     combined_fold_user_ada_value_borrowed = 0
     combined_total_market_revenue_ada_value_daily = 0
+    combined_only_user_ada_value_supplied_int_gen = 0
+    combined_fold_user_ada_value_supplied_int_gen = 0
+    combined_fold_user_ada_value_borrowed_int_gen = 0
 
     for market in markets_list:
         combined_total_ada_value_supplied += market[ "total_ada_value_supplied" ]
@@ -688,12 +693,22 @@ def get_liqwid_data( params_list ):
         combined_fold_user_ada_value_supplied += market[ "fold_user_ada_value_supplied" ]
         combined_fold_user_ada_value_borrowed += market[ "fold_user_ada_value_borrowed" ]
         combined_total_market_revenue_ada_value_daily += market[ "total_market_revenue_ada_value_daily" ]
+        combined_only_user_ada_value_supplied_int_gen += market[ "only_user_ada_value_supplied_int_gen" ]
+        combined_fold_user_ada_value_supplied_int_gen += market[ "fold_user_ada_value_supplied_int_gen" ]
+        combined_fold_user_ada_value_borrowed_int_gen += market[ "fold_user_ada_value_borrowed_int_gen" ]
+
 
     supply_proportion = combined_user_ada_value_supplied / combined_total_ada_value_supplied
     #borrow_proportion = combined_user_ada_value_borrowed / combined_total_ada_value_borrowed
-    only_supply_proportion = combined_only_user_ada_value_supplied / combined_total_ada_value_supplied
-    fold_supply_proportion = combined_fold_user_ada_value_supplied / combined_total_ada_value_supplied
-    fold_borrow_proportion = combined_fold_user_ada_value_borrowed / combined_total_ada_value_borrowed
+    #only_supply_proportion = combined_only_user_ada_value_supplied / combined_total_ada_value_supplied
+    #fold_supply_proportion = combined_fold_user_ada_value_supplied / combined_total_ada_value_supplied
+    #fold_borrow_proportion = combined_fold_user_ada_value_borrowed / combined_total_ada_value_borrowed
+
+    print(combined_fold_user_ada_value_borrowed_int_gen)
+
+    only_supply_proportion = combined_only_user_ada_value_supplied_int_gen / combined_total_market_revenue_ada_value_daily
+    fold_supply_proportion = combined_fold_user_ada_value_supplied_int_gen / combined_total_market_revenue_ada_value_daily
+    fold_borrow_proportion = combined_fold_user_ada_value_borrowed_int_gen / combined_total_market_revenue_ada_value_daily
 
     #10% is current amount of revenue to LQ stakers
     total_protocol_revenue_ada_value = combined_total_market_revenue_ada_value_daily * 0.1
