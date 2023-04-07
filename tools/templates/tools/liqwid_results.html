@@ -7,116 +7,6 @@
 <p class="display-6 pb-3">Estimated Liqwid Rewards</p>
 
 <div class="container">
-    <!--
-    <div class="row">
-        <p><b>Current Strategy</b></p>
-        <div class="col">
-            <b>Daily</b>
-            <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col">Market</th>
-                            <th scope="col">Supply</th>
-                            <th scope="col">Borrow</th>
-                            <th scope="col">Stake</th>
-                        </tr>
-                    </thead>
-                    {% for market in markets_list %}
-                        <tbody>
-                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
-                            <td>{{ market.supply_revenue_daily | floatformat:2 | intcomma  }} </td> 
-                            <td>{{ market.borrow_interest_daily | floatformat:2 | intcomma  }}</td>
-                            <td>{{ market.stake_revenue_daily | floatformat:2 | intcomma  }}</td>
-                        </tbody>
-                    {% endfor %}
-                        <tbody>
-                            <th>Total (LQ)</th>
-                            <td>{{ lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
-                            <td>{{ lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }}</td> 
-                            <td>N/A</td>
-                        </tbody>
-                        <tbody>
-                            <th>Total (Ada)</th>
-                            <td>{{ lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
-                            <td>{{ lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }}</td>
-                            <td>N/A</td>
-                        </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="col">
-            <b>Weekly</b>
-            <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col">Market</th>
-                            <th scope="col">Supply</th>
-                            <th scope="col">Borrow</th>
-                            <th scope="col">Stake</th>
-                        </tr>
-                    </thead>
-                    {% for market in markets_list %}
-                        <tbody>
-                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
-                            <td>{{ market.supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }} </td> 
-                            <td>{{ market.borrow_interest_daily |mul:7 | floatformat:2 | intcomma  }}</td>
-                            <td>{{ market.stake_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td>
-                        </tbody>
-                    {% endfor %}
-                    <tbody>
-                        <th>Total (LQ)</th>
-                        <td>{{ lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
-                        <td>{{ lq_reward_borrow_revenue_daily |mul:7 | floatformat:2 | intcomma }}</td>
-                        <td>N/A</td>
-                    </tbody>
-                    <tbody>
-                        <th>Total (Ada)</th>
-                        <td>{{ lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td>
-                        <td>{{ lq_reward_borrow_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
-                        <td>N/A</td>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="col">
-            <b>Monthly</b>
-            <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col">Market</th>
-                            <th scope="col">Supply</th>
-                            <th scope="col">Borrow</th>
-                            <th scope="col">Stake</th>
-                        </tr>
-                    </thead>
-                    {% for market in markets_list %}
-                        <tbody>
-                            <th>{{ market.market_id }} ({{ market.market_id }})</th>
-                            <td>{{ market.supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }} </td> 
-                            <td>{{ market.borrow_interest_daily |mul:30 | floatformat:2 | intcomma  }}</td>
-                            <td>{{ market.stake_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td>
-                        </tbody>
-                    {% endfor %}
-                        <tbody>
-                            <th>Total (LQ)</th>
-                            <td>{{ lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td> 
-                            <td>{{ lq_reward_borrow_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
-                            <td>N/A</td>
-                        </tbody>
-                        <tbody>
-                            <th>Total (Ada)</th>
-                            <td>{{ lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma  }}</td>
-                            <td>{{ lq_reward_borrow_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
-                            <td>N/A</td>
-                        </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    -->
     <div class="row">
         <p><b>Supply Only Strategy</b></p>
         <div class="col">
@@ -141,13 +31,13 @@
                     {% endfor %}
                         <tbody>
                             <th>Total (LQ)</th>
-                            <td>{{ only_lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
+                            <td>{{ lq_rewards.only_lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
                             <td>N/A</td> 
                             <td>N/A</td>
                         </tbody>
                         <tbody>
                             <th>Total (Ada)</th>
-                            <td>{{ only_lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
+                            <td>{{ lq_rewards.only_lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
                             <td>N/A</td>
                             <td>N/A</td>
                         </tbody>
@@ -176,13 +66,13 @@
                     {% endfor %}
                     <tbody>
                         <th>Total (LQ)</th>
-                        <td>{{ only_lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
+                        <td>{{ lq_rewards.only_lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
                         <td>N/A</td>
                         <td>N/A</td>
                     </tbody>
                     <tbody>
                         <th>Total (Ada)</th>
-                        <td>{{ only_lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td> 
+                        <td>{{ lq_rewards.only_lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td> 
                         <td>N/A</td>
                         <td>N/A</td>
                     </tbody>
@@ -211,13 +101,13 @@
                     {% endfor %}
                         <tbody>
                             <th>Total (LQ)</th>
-                            <td>{{ only_lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td> 
+                            <td>{{ lq_rewards.only_lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma  }}</td> 
                             <td>N/A</td>
                             <td>N/A</td>
                         </tbody>
                         <tbody>
                             <th>Total (Ada)</th>
-                            <td>{{ only_lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma  }}</td>
+                            <td>{{ lq_rewards.only_lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma  }}</td>
                             <td>N/A</td>
                             <td>N/A</td>
                         </tbody>
@@ -249,14 +139,14 @@
                     {% endfor %}
                         <tbody>
                             <th>Total (LQ)</th>
-                            <td>{{ fold_lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
-                            <td>{{ fold_lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.fold_lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
+                            <td>{{ lq_rewards.fold_lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }}</td> 
                             <td>N/A</td>
                         </tbody>
                         <tbody>
                             <th>Total (Ada)</th>
-                            <td>{{ fold_lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
-                            <td>{{ fold_lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.fold_lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
+                            <td>{{ lq_rewards.fold_lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }}</td>
                             <td>N/A</td>
                         </tbody>
                 </table>
@@ -284,14 +174,14 @@
                     {% endfor %}
                     <tbody>
                         <th>Total (LQ)</th>
-                        <td>{{ fold_lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
-                        <td>{{ fold_lq_reward_borrow_revenue_daily |mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.fold_lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
+                        <td>{{ lq_rewards.fold_lq_reward_borrow_revenue_daily |mul:7 | floatformat:2 | intcomma }}</td>
                         <td>N/A</td>
                     </tbody>
                     <tbody>
                         <th>Total (Ada)</th>
-                        <td>{{ fold_lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td>
-                        <td>{{ fold_lq_reward_borrow_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.fold_lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td>
+                        <td>{{ lq_rewards.fold_lq_reward_borrow_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
                         <td>N/A</td>
                     </tbody>
                 </table>
@@ -319,14 +209,14 @@
                     {% endfor %}
                         <tbody>
                             <th>Total (LQ)</th>
-                            <td>{{ fold_lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
-                            <td>{{ fold_lq_reward_borrow_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.fold_lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.fold_lq_reward_borrow_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
                             <td>N/A</td>
                         </tbody>
                         <tbody>
                             <th>Total (Ada)</th>
-                            <td>{{ fold_lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
-                            <td>{{ fold_lq_reward_borrow_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.fold_lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.fold_lq_reward_borrow_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
                             <td>N/A</td>
                         </tbody>
                 </table>
@@ -334,7 +224,7 @@
         </div>
     </div>
     <div class="row">
-        <p><b>Revenue Share via LQ Staking</b></p>
+        <p><b>Revenue Share via LQ Staking (currently only accurate with Ada input)</b></p>
         <div class="col">
             <b>Daily</b>
             <div class="table-responsive">
@@ -355,8 +245,8 @@
                     {% endfor %}
                         <tbody>
                             <th>Total (Ada)</th>
-                            <td>{{ user_protocol_revenue_ada_value | floatformat:2 | intcomma }}</td>
-                            <td>{{ lq_price |mul:total_staked_lq |div:total_protocol_revenue_ada_value  | floatformat:2 | intcomma}}</td>
+                            <td>{{ lq_rewards.user_protocol_revenue_ada_value | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_price |mul:total_staked_lq |div:lq_rewards.total_protocol_revenue_ada_value  | floatformat:2 | intcomma}}</td>
                         </tbody>
                 </table>
             </div>
@@ -381,8 +271,8 @@
                     {% endfor %}
                         <tbody>
                             <th>Total (Ada)</th>
-                            <td>{{ user_protocol_revenue_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
-                            <td>{{ lq_price |mul:total_staked_lq |div:total_protocol_revenue_ada_value |div:7 | floatformat:2 | intcomma}}</td>
+                            <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_price |mul:total_staked_lq |div:lq_rewards.total_protocol_revenue_ada_value |div:7 | floatformat:2 | intcomma}}</td>
                         </tbody>
                 </table>
             </div>
@@ -407,8 +297,8 @@
                     {% endfor %}
                         <tbody>
                             <th>Total (Ada)</th>
-                            <td>{{ user_protocol_revenue_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
-                            <td>{{ lq_price |mul:total_staked_lq |div:total_protocol_revenue_ada_value |div:30 | floatformat:2 | intcomma}}</td>
+                            <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_price |mul:total_staked_lq |div:lq_rewards.total_protocol_revenue_ada_value |div:30 | floatformat:2 | intcomma}}</td>
                         </tbody>
                 </table>
             </div>
@@ -429,23 +319,23 @@
                     </thead>
                     <tbody>
                         <th>2%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.02 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.02 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.02 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.02 | floatformat:2 | intcomma }}</td>
                     </tbody>
                     <tbody>
                         <th>3%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.03 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.03 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.03 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.03 | floatformat:2 | intcomma }}</td>
                     </tbody>
                     <tbody>
                         <th>4%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.04 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.04 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.04 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.04 | floatformat:2 | intcomma }}</td>
                     </tbody>
                     <tbody>
                         <th>5%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.05 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.05 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.05 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.05 | floatformat:2 | intcomma }}</td>
                     </tbody>
                 </table>
             </div>
@@ -463,23 +353,23 @@
                     </thead>
                     <tbody>
                         <th>2%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.02 | mul:7 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.02 | mul:7 | floatformat:2 | intcomma}}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.02 | mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.02 | mul:7 | floatformat:2 | intcomma}}</td>
                     </tbody>
                     <tbody>
                         <th>3%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.03 | mul:7 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.03 | mul:7 | floatformat:2 | intcomma}}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.03 | mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.03 | mul:7 | floatformat:2 | intcomma}}</td>
                     </tbody>
                     <tbody>
                         <th>4%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.04 | mul:7 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.04 | mul:7 | floatformat:2 | intcomma}}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.04 | mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.04 | mul:7 | floatformat:2 | intcomma}}</td>
                     </tbody>
                     <tbody>
                         <th>5%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.05 | mul:7 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.05 | mul:7 | floatformat:2 | intcomma}}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.05 | mul:7 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.05 | mul:7 | floatformat:2 | intcomma}}</td>
                     </tbody>
                 </table>
             </div>
@@ -497,23 +387,23 @@
                     </thead>
                     <tbody>
                         <th>2%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.02 | mul:30 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.02 | mul:30 | floatformat:2 | intcomma}}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.02 | mul:30 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.02 | mul:30 | floatformat:2 | intcomma}}</td>
                     </tbody>
                     <tbody>
                         <th>3%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.03 | mul:30 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.03 | mul:30 | floatformat:2 | intcomma}}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.03 | mul:30 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.03 | mul:30 | floatformat:2 | intcomma}}</td>
                     </tbody>
                     <tbody>
                         <th>4%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.04 | mul:30 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.04 | mul:30 | floatformat:2 | intcomma}}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.04 | mul:30 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.04 | mul:30 | floatformat:2 | intcomma }}</td>
                     </tbody>
                     <tbody>
                         <th>5%</th>
-                        <td>{{ user_protocol_revenue_ada_value |mul:1.05 | mul:30 | floatformat:2 | intcomma }}</td>
-                        <td>{{ user_protocol_revenue_ada_value |mul:0.05 | mul:30 | floatformat:2 | intcomma}}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:1.05 | mul:30 | floatformat:2 | intcomma }}</td>
+                        <td>{{ lq_rewards.user_protocol_revenue_ada_value |mul:0.05 | mul:30 | floatformat:2 | intcomma }}</td>
                     </tbody>
                 </table>
             </div>

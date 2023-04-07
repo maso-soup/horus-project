@@ -504,7 +504,92 @@ def wallet( request, addr = None ):
 def faq( request ):
     return render( request, 'tools/faq.html' )
 
-def get_liqwid_data( params_list ):
+def get_token_price( policyassetID ):
+    response = requests.get( MINSWAP_API_URL )
+
+    if response.status_code != 200 :
+        return "Minswap API Error"
+
+    response_json = response.json()
+
+    token_pair_info = response_json[ policyassetID + "_lovelace" ]
+    return float( token_pair_info[ "last_price" ] )
+
+def get_optimal_market_data( user_token_supply, market, stake_apy, ltv_ratio, folds, user_staked_lq_proportion ):
+
+    revenue_share_percentage = 0.1
+    market_dict = {}
+
+    only_user_token_supply = user_token_supply
+    fold_user_token_supply = only_user_token_supply
+    fold_user_token_borrow = 0
+    base_fold_user_token_supply = only_user_token_supply
+
+    for _ in range( 0, folds ):
+        base_fold_user_token_supply = base_fold_user_token_supply * ltv_ratio
+        fold_user_token_supply += ( base_fold_user_token_supply )
+        fold_user_token_borrow += ( base_fold_user_token_supply )
+
+    market_id = market[ "marketId" ]
+    market_dict[ "market_id" ] = market_id
+    
+    if market_id == "Ada" :
+        token_price = 1
+        stake_daily_apr = ( ( 1 + stake_apy ) ** ( 1/365 ) ) - 1
+
+    else:
+        token_price = get_token_price( LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME[ market_id ] )
+        stake_daily_apr = 0
+
+    utilization = float( market[ "utilization" ] )
+    token_liquidity = float ( market [ "totalSupply" ] ) / 1000000
+    total_token_supplied = token_liquidity / ( 1 - utilization )
+    total_token_borrowed = total_token_supplied * utilization
+
+    borrow_daily_apr = ( ( 1 + float( market[ "borrowApy" ] ) ) ** ( 1/365 ) ) - 1
+    supply_daily_apr = ( ( 1 + float( market[ "supplyApy" ] ) ) ** ( 1/365 ) ) - 1
+
+    only_supply_revenue_daily = supply_daily_apr * only_user_token_supply
+    fold_supply_revenue_daily = supply_daily_apr * fold_user_token_supply
+    fold_borrow_interest_daily = borrow_daily_apr * fold_user_token_borrow
+
+    market_dict[ "only_supply_revenue_daily" ] = only_supply_revenue_daily
+    market_dict[ "fold_supply_revenue_daily" ] = fold_supply_revenue_daily
+    market_dict[ "fold_borrow_interest_daily" ] = -fold_borrow_interest_daily
+
+    total_ada_value_supplied = total_token_supplied * token_price
+    total_ada_value_borrowed = total_token_borrowed * token_price
+
+    total_market_revenue_daily = total_token_borrowed * borrow_daily_apr
+    total_market_revenue_ada_value_daily = total_ada_value_borrowed * borrow_daily_apr
+
+    market_dict[ "total_market_revenue_daily" ] = total_market_revenue_daily * revenue_share_percentage
+    market_dict[ "user_market_revenue_daily" ] = total_market_revenue_daily * 0.1 * user_staked_lq_proportion
+    
+    only_user_ada_value_supplied = only_user_token_supply * token_price
+    fold_user_ada_value_supplied = fold_user_token_supply * token_price
+    fold_user_ada_value_borrowed = fold_user_token_borrow * token_price
+
+    market_dict[ "only_user_ada_value_supplied" ] = only_user_ada_value_supplied
+    market_dict[ "fold_user_ada_value_supplied" ] = fold_user_token_supply
+    market_dict[ "fold_user_ada_value_borrowed" ] = fold_user_token_borrow
+
+    only_stake_revenue_daily = stake_daily_apr * only_user_token_supply
+    fold_stake_revenue_daily = stake_daily_apr * fold_user_token_supply
+    
+    market_dict[ "only_stake_revenue_daily" ] = only_stake_revenue_daily
+    market_dict[ "fold_stake_revenue_daily" ] = fold_stake_revenue_daily
+
+    market_dict[ "only_user_ada_value_supplied_int_gen" ] = only_user_ada_value_supplied * supply_daily_apr
+    market_dict[ "fold_user_ada_value_supplied_int_gen" ] = fold_user_ada_value_supplied * supply_daily_apr
+    market_dict[ "fold_user_ada_value_borrowed_int_gen" ] = fold_user_ada_value_borrowed * borrow_daily_apr
+
+    market_dict[ "total_market_revenue_ada_value_daily" ] = total_market_revenue_ada_value_daily
+
+    return market_dict
+
+def calculate_lq_rewards( markets_list, user_staked_lq_proprotion ):
+    lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
 
     lq_reward_dist_supply_ratio = 0.5
     lq_reward_dist_reduction = 1
@@ -512,7 +597,68 @@ def get_liqwid_data( params_list ):
     lq_reward_dist_supply_yearly = 2493750 * lq_reward_dist_supply_ratio * lq_reward_dist_reduction
     lq_reward_dist_borrow_yearly = 2493750 * ( 1 - lq_reward_dist_supply_ratio ) * lq_reward_dist_reduction
 
-    markets_list = []
+    combined_total_market_revenue_ada_value_daily = 0
+    combined_only_user_ada_value_supplied_int_gen = 0
+    combined_fold_user_ada_value_supplied_int_gen = 0
+    combined_fold_user_ada_value_borrowed_int_gen = 0
+
+    for market in markets_list:
+        combined_total_market_revenue_ada_value_daily += market[ "total_market_revenue_ada_value_daily" ]
+        combined_only_user_ada_value_supplied_int_gen += market[ "only_user_ada_value_supplied_int_gen" ]
+        combined_fold_user_ada_value_supplied_int_gen += market[ "fold_user_ada_value_supplied_int_gen" ]
+        combined_fold_user_ada_value_borrowed_int_gen += market[ "fold_user_ada_value_borrowed_int_gen" ]
+
+    only_supply_proportion = combined_only_user_ada_value_supplied_int_gen / combined_total_market_revenue_ada_value_daily
+    fold_supply_proportion = combined_fold_user_ada_value_supplied_int_gen / combined_total_market_revenue_ada_value_daily
+    fold_borrow_proportion = combined_fold_user_ada_value_borrowed_int_gen / combined_total_market_revenue_ada_value_daily
+
+    only_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * only_supply_proportion
+    fold_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * fold_supply_proportion
+    fold_lq_reward_borrow_revenue_daily = ( lq_reward_dist_borrow_yearly / 365 ) * fold_borrow_proportion
+
+    total_protocol_revenue_ada_value = combined_total_market_revenue_ada_value_daily * 0.1
+    user_protocol_revenue_ada_value = combined_total_market_revenue_ada_value_daily * 0.1 * user_staked_lq_proprotion
+
+    only_lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * only_supply_proportion
+    fold_lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * fold_supply_proportion
+    fold_lq_reward_borrow_revenue_daily_ada_value = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * fold_borrow_proportion
+
+    lq_rewards_dict = {
+        "only_lq_reward_supply_revenue_daily" : only_lq_reward_supply_revenue_daily,
+        "fold_lq_reward_supply_revenue_daily" : fold_lq_reward_supply_revenue_daily,
+        "fold_lq_reward_borrow_revenue_daily" : fold_lq_reward_borrow_revenue_daily,
+        "only_lq_reward_supply_revenue_daily_ada_value" : only_lq_reward_supply_revenue_daily_ada_value,
+        "fold_lq_reward_supply_revenue_daily_ada_value" : fold_lq_reward_supply_revenue_daily_ada_value,
+        "fold_lq_reward_borrow_revenue_daily_ada_value" : fold_lq_reward_borrow_revenue_daily_ada_value,
+        "total_protocol_revenue_ada_value" : total_protocol_revenue_ada_value,
+        "user_protocol_revenue_ada_value" : user_protocol_revenue_ada_value,
+    }
+    
+    return lq_rewards_dict
+
+def get_lq_staking_details( params_list, staking_address ):
+    lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
+    
+    user_staked_lq = params_list[0] / lq_price
+    staked_lq_address = api.address( staking_address, return_type='json' )
+    #add user's possible amount to total
+    total_staked_lq = user_staked_lq
+    
+    for a in staked_lq_address[ "amount" ]:
+        if a[ "unit" ] == "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" :
+            total_staked_lq += float( a[ "quantity" ] ) / 1000000
+
+    user_staked_lq_proportion = user_staked_lq / total_staked_lq
+
+    lq_staking_dict = {
+        "user_staked_lq_proportion" : user_staked_lq_proportion,
+        "total_staked_lq" : total_staked_lq,
+        "lq_price" : lq_price
+    }
+
+    return lq_staking_dict
+
+def get_liqwid_data( params_list ):
 
     post_payload = {
         "operationName": "GetMarkets",
@@ -527,223 +673,31 @@ def get_liqwid_data( params_list ):
     liqwid_api_data = response.json()
     liqwid_markets_data = liqwid_api_data[ "data" ][ "markets" ]
 
-    response = requests.get( MINSWAP_API_URL )
+    lq_staking_details = get_lq_staking_details( params_list, "addr1w8arvq7j9qlrmt0wpdvpp7h4jr4fmfk8l653p9t907v2nsss7w7r4" )
 
-    if response.status_code != 200 :
-        return "Minswap API Error"
-
-    response_JSON = response.json()
-
-    token_pair_info = response_JSON[ "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51_lovelace" ]
-    lq_price = float( token_pair_info[ "last_price" ] )
-    
-    user_staked_lq = params_list[0] / lq_price
-    staked_lq_address = api.address( "addr1w8arvq7j9qlrmt0wpdvpp7h4jr4fmfk8l653p9t907v2nsss7w7r4", return_type='json' )
-    #add user's possible amount to total
-    total_staked_lq = user_staked_lq
-    
-    for a in staked_lq_address[ "amount" ]:
-        if a[ "unit" ] == "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" :
-            total_staked_lq += float( a[ "quantity" ] ) / 1000000
-
-    user_staked_lq_proprotion = user_staked_lq / total_staked_lq
-
+    markets_list = []
     stake_apy = 0.0305
     ltv_ratio = 0.7
     folds = 7
 
     param_counter = 0
+    user_token_supply = 0
 
     for market in liqwid_markets_data:
-
-        market_dict = {}
-
+        
         user_token_supply = params_list[ param_counter ]
-        #user_token_borrow = params_list[ param_counter + 1 ]
-
+        market_data_dict = get_optimal_market_data( user_token_supply, market, stake_apy, ltv_ratio, folds, lq_staking_details[ "user_staked_lq_proportion" ] )
         param_counter += 1
 
-        #only_user_token_supply = user_token_supply - user_token_borrow
-        only_user_token_supply = user_token_supply
-        fold_user_token_supply = only_user_token_supply
-        fold_user_token_borrow = 0
-        base_fold_user_token_supply = only_user_token_supply
+        markets_list.append( market_data_dict, lq_staking_details[ "user_staked_lq_proportion" ] )
 
-        for _ in range( 0, folds ):
-            base_fold_user_token_supply = base_fold_user_token_supply * ltv_ratio
-            fold_user_token_supply += ( base_fold_user_token_supply )
-            fold_user_token_borrow += ( base_fold_user_token_supply )
-
-        market_id = market[ "marketId" ]
-        market_dict[ "market_id" ] = market_id
-        
-        #qtoken_exchange_rate = float( market[ "exchangeRate" ] )
-        utilization = float( market[ "utilization" ] )
-        token_liquidity = float ( market [ "totalSupply" ] ) / 1000000
-
-        #total_qtoken_supplied = float ( api.asset( market[ "qTokenPolicyId" ], return_type='json' )[ 'quantity' ] ) 
-
-        borrow_daily_apr = ( ( 1 + float( market[ "borrowApy" ] ) ) ** ( 1/365 ) ) - 1
-        supply_daily_apr = ( ( 1 + float( market[ "supplyApy" ] ) ) ** ( 1/365 ) ) - 1
-        stake_daily_apr = ( ( 1 + stake_apy ) ** ( 1/365 ) ) - 1
-
-        market_dict[ "borrow_daily_apr" ] = borrow_daily_apr * 100
-        market_dict[ "supply_daily_apr" ] = supply_daily_apr * 100
-
-        supply_revenue_daily = supply_daily_apr * user_token_supply
-        #borrow_interest_daily = borrow_daily_apr * user_token_borrow
-        only_supply_revenue_daily = supply_daily_apr * only_user_token_supply
-        fold_supply_revenue_daily = supply_daily_apr * fold_user_token_supply
-        fold_borrow_interest_daily = borrow_daily_apr * fold_user_token_borrow
-
-        market_dict[ "supply_revenue_daily" ] = supply_revenue_daily
-        #market_dict[ "borrow_interest_daily" ] = -borrow_interest_daily
-        market_dict[ "only_supply_revenue_daily" ] = only_supply_revenue_daily
-        market_dict[ "fold_supply_revenue_daily" ] = fold_supply_revenue_daily
-        market_dict[ "fold_borrow_interest_daily" ] = -fold_borrow_interest_daily
-
-        #total_token_supplied = qtoken_exchange_rate * ( total_qtoken_supplied / 1000000 )
-        total_token_supplied = token_liquidity / ( 1 - utilization )
-        total_token_borrowed = total_token_supplied * utilization
-
-        total_ada_value_supplied = total_token_supplied
-        total_ada_value_borrowed = total_token_borrowed
-
-        total_market_revenue_daily = total_token_borrowed * borrow_daily_apr
-        total_market_revenue_ada_value_daily = total_ada_value_borrowed * borrow_daily_apr
-
-        #10% is current share to stakers
-        market_dict[ "total_market_revenue_daily" ] = total_market_revenue_daily * 0.1
-        market_dict[ "user_market_revenue_daily" ] = total_market_revenue_daily * 0.1 * user_staked_lq_proprotion
-
-        user_ada_value_supplied = user_token_supply
-        #user_ada_value_borrowed = user_token_borrow
-        only_user_ada_value_supplied = only_user_token_supply
-        fold_user_ada_value_supplied = fold_user_token_supply
-        fold_user_ada_value_borrowed = fold_user_token_borrow
-
-        market_dict[ "stake_daily_apr" ] = ( stake_daily_apr * 100 ) * ( token_liquidity / total_token_supplied  )
-        stake_revenue_daily = stake_daily_apr * ( user_token_supply )
-        only_stake_revenue_daily = stake_daily_apr * ( only_user_token_supply )
-        fold_stake_revenue_daily = stake_daily_apr * ( fold_user_token_supply )
-        
-        market_dict[ "stake_revenue_daily" ] = stake_revenue_daily
-        market_dict[ "only_stake_revenue_daily" ] = only_stake_revenue_daily
-        market_dict[ "fold_stake_revenue_daily" ] = fold_stake_revenue_daily
-
-        token_price = 1
-
-        if market_id != "Ada" :
-            token_pair_info = response_JSON[ LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME[ market_id ] + "_lovelace" ]
-            token_price = float( token_pair_info[ "last_price" ] )
-
-            total_ada_value_supplied = total_token_supplied * token_price
-            total_ada_value_borrowed = total_token_borrowed * token_price
-
-            total_market_revenue_ada_value_daily = total_ada_value_borrowed * borrow_daily_apr
-
-            user_ada_value_supplied = ( user_token_supply ) * token_price
-            #user_ada_value_borrowed = ( user_token_borrow ) * token_price
-            only_user_ada_value_supplied = ( only_user_token_supply ) * token_price
-            fold_user_ada_value_supplied = ( fold_user_token_supply ) * token_price
-            fold_user_ada_value_borrowed = ( fold_user_token_borrow ) * token_price
-
-            market_dict[ "stake_daily_apr" ] = 0
-            market_dict[ "stake_revenue_daily" ] = 0
-            market_dict[ "only_stake_revenue_daily" ] = 0
-            market_dict[ "fold_stake_revenue_daily" ] = 0
-
-        market_dict[ "token_price" ] = token_price
-
-        market_dict[ "total_ada_value_supplied" ] = total_ada_value_supplied
-        market_dict[ "total_ada_value_borrowed" ] = total_ada_value_borrowed
-        market_dict[ "user_ada_value_supplied" ] = user_ada_value_supplied
-        #market_dict[ "user_ada_value_borrowed" ] = user_ada_value_borrowed
-        market_dict[ "only_user_ada_value_supplied" ] = only_user_ada_value_supplied
-        market_dict[ "fold_user_ada_value_supplied" ] = fold_user_ada_value_supplied
-        market_dict[ "fold_user_ada_value_borrowed" ] = fold_user_ada_value_borrowed
-
-        market_dict[ "only_user_ada_value_supplied_int_gen" ] = only_user_ada_value_supplied * supply_daily_apr
-        market_dict[ "fold_user_ada_value_supplied_int_gen" ] = fold_user_ada_value_supplied * supply_daily_apr
-        market_dict[ "fold_user_ada_value_borrowed_int_gen" ] = fold_user_ada_value_borrowed * borrow_daily_apr
-
-        market_dict[ "total_market_revenue_ada_value_daily" ] = total_market_revenue_ada_value_daily
-        market_dict[ "user_market_revenue_ada_value_daily" ] = total_market_revenue_ada_value_daily * user_staked_lq_proprotion
-
-        markets_list.append( market_dict )
-
-    combined_total_ada_value_supplied = 0
-    combined_total_ada_value_borrowed = 0
-    combined_user_ada_value_supplied = 0
-    #combined_user_ada_value_borrowed = 0
-    combined_only_user_ada_value_supplied = 0
-    combined_fold_user_ada_value_supplied = 0
-    combined_fold_user_ada_value_borrowed = 0
-    combined_total_market_revenue_ada_value_daily = 0
-    combined_only_user_ada_value_supplied_int_gen = 0
-    combined_fold_user_ada_value_supplied_int_gen = 0
-    combined_fold_user_ada_value_borrowed_int_gen = 0
-
-    for market in markets_list:
-        combined_total_ada_value_supplied += market[ "total_ada_value_supplied" ]
-        combined_total_ada_value_borrowed += market[ "total_ada_value_borrowed" ]
-        combined_user_ada_value_supplied += market[ "user_ada_value_supplied" ]
-        #combined_user_ada_value_borrowed += market[ "user_ada_value_borrowed" ]
-        combined_only_user_ada_value_supplied += market[ "only_user_ada_value_supplied" ]
-        combined_fold_user_ada_value_supplied += market[ "fold_user_ada_value_supplied" ]
-        combined_fold_user_ada_value_borrowed += market[ "fold_user_ada_value_borrowed" ]
-        combined_total_market_revenue_ada_value_daily += market[ "total_market_revenue_ada_value_daily" ]
-        combined_only_user_ada_value_supplied_int_gen += market[ "only_user_ada_value_supplied_int_gen" ]
-        combined_fold_user_ada_value_supplied_int_gen += market[ "fold_user_ada_value_supplied_int_gen" ]
-        combined_fold_user_ada_value_borrowed_int_gen += market[ "fold_user_ada_value_borrowed_int_gen" ]
-
-
-    supply_proportion = combined_user_ada_value_supplied / combined_total_ada_value_supplied
-    #borrow_proportion = combined_user_ada_value_borrowed / combined_total_ada_value_borrowed
-    #only_supply_proportion = combined_only_user_ada_value_supplied / combined_total_ada_value_supplied
-    #fold_supply_proportion = combined_fold_user_ada_value_supplied / combined_total_ada_value_supplied
-    #fold_borrow_proportion = combined_fold_user_ada_value_borrowed / combined_total_ada_value_borrowed
-
-    print(combined_fold_user_ada_value_borrowed_int_gen)
-
-    only_supply_proportion = combined_only_user_ada_value_supplied_int_gen / combined_total_market_revenue_ada_value_daily
-    fold_supply_proportion = combined_fold_user_ada_value_supplied_int_gen / combined_total_market_revenue_ada_value_daily
-    fold_borrow_proportion = combined_fold_user_ada_value_borrowed_int_gen / combined_total_market_revenue_ada_value_daily
-
-    #10% is current amount of revenue to LQ stakers
-    total_protocol_revenue_ada_value = combined_total_market_revenue_ada_value_daily * 0.1
-    user_protocol_revenue_ada_value = combined_total_market_revenue_ada_value_daily * 0.1 * user_staked_lq_proprotion
-
-    lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * supply_proportion
-    #lq_reward_borrow_revenue_daily = ( lq_reward_dist_borrow_yearly / 365 ) * borrow_proportion
-    only_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * only_supply_proportion
-    fold_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * fold_supply_proportion
-    fold_lq_reward_borrow_revenue_daily = ( lq_reward_dist_borrow_yearly / 365 ) * fold_borrow_proportion
-
-    lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * supply_proportion
-    #lq_reward_borrow_revenue_daily_ada_value = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * borrow_proportion
-    only_lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * only_supply_proportion
-    fold_lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * fold_supply_proportion
-    fold_lq_reward_borrow_revenue_daily_ada_value = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * fold_borrow_proportion
+    lq_rewards = calculate_lq_rewards( markets_list, lq_staking_details[ "user_staked_lq_proportion" ] )
 
     output_data = {
         "markets_list" : markets_list,
-        "supply_proportion" : supply_proportion * 100,
-        #"borrow_proportion" : borrow_proportion * 100,
-        "lq_reward_supply_revenue_daily" : lq_reward_supply_revenue_daily,
-        #"lq_reward_borrow_revenue_daily" : lq_reward_borrow_revenue_daily,
-        "only_lq_reward_supply_revenue_daily" : only_lq_reward_supply_revenue_daily,
-        "fold_lq_reward_supply_revenue_daily" : fold_lq_reward_supply_revenue_daily,
-        "fold_lq_reward_borrow_revenue_daily" : fold_lq_reward_borrow_revenue_daily,
-        "lq_reward_supply_revenue_daily_ada_value" : lq_reward_supply_revenue_daily_ada_value,
-        #"lq_reward_borrow_revenue_daily_ada_value" : lq_reward_borrow_revenue_daily_ada_value,
-        "only_lq_reward_supply_revenue_daily_ada_value" : only_lq_reward_supply_revenue_daily_ada_value,
-        "fold_lq_reward_supply_revenue_daily_ada_value" : fold_lq_reward_supply_revenue_daily_ada_value,
-        "fold_lq_reward_borrow_revenue_daily_ada_value" : fold_lq_reward_borrow_revenue_daily_ada_value,
-        "total_protocol_revenue_ada_value" : total_protocol_revenue_ada_value,
-        "user_protocol_revenue_ada_value" : user_protocol_revenue_ada_value,
-        "lq_price" : lq_price,
-        "total_staked_lq" : total_staked_lq,
+        "lq_rewards" : lq_rewards,
+        "lq_price" : lq_staking_details[ "lq_price" ],
+        "total_staked_lq" : lq_staking_details[ "total_staked_lq" ],
     }
 
     return output_data
@@ -757,6 +711,7 @@ def liqwid( request ):
         try:
             user_data = request.POST.getlist('data', None)
             data_list = [ float( d ) if d != "" else 0.0 for d in user_data ]
+            print(data_list)
 
         except ValueError :
             return render( request, 'tools/liqwid_home.html' )
