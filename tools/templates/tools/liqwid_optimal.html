@@ -3,7 +3,7 @@
 
 <p class="display-6 pb-3"> Estimate Optimal Liqwid Rewards</p>
 
-<form class="d-flex" method="POST" action="{% url 'liqwid'%}">
+<form class="d-flex" method="POST" action="{% url 'liqwid-optimal'%}">
     {% csrf_token %}
     <div class="markets mx-auto">
         <input class="form-control my-2" type="input" name="data" placeholder="Total User Ada" aria-label="Search">

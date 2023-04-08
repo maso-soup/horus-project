@@ -1,0 +1,20 @@
+{% extends "tools/base.html" %}
+{% block search %}
+
+<p class="display-6 pb-3"> Estimate Current Liqwid Rewards</p>
+
+<form class="d-flex" method="POST" action="{% url 'liqwid-current'%}">
+    {% csrf_token %}
+    <div class="markets mx-auto">
+        <input class="form-control my-2" type="input" name="data" placeholder="Total LQ Staked" aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Total Ada Supplied" aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Total Ada Borrowed" aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Total Djed Supplied" aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Total Djed Borrowed" aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Total Shen Supplied" aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Total Shen Borrowed" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Calculate</button>
+    </div>
+</form>
+
+{% endblock search %}
