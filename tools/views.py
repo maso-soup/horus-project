@@ -578,13 +578,17 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
     combined_total_market_revenue_ada_value_daily = 0
     combined_user_ada_value_supplied_int_gen = 0
     combined_user_ada_value_borrowed_int_gen = 0
+    combined_user_ada_value_supplied = 0
+    combined_total_ada_value_supplied = 0
 
     for market in markets_list:
         combined_total_market_revenue_ada_value_daily += market[ "total_market_revenue_ada_value_daily" ]
         combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
         combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
+        combined_user_ada_value_supplied += market[ "user_ada_value_supplied" ]
+        combined_total_ada_value_supplied += market[ "total_ada_value_supplied" ]
 
-    supply_proportion = combined_user_ada_value_supplied_int_gen / combined_total_market_revenue_ada_value_daily
+    supply_proportion = combined_user_ada_value_supplied / combined_total_ada_value_supplied
     borrow_proportion = combined_user_ada_value_borrowed_int_gen / combined_total_market_revenue_ada_value_daily
 
     lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * supply_proportion
@@ -802,6 +806,9 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     total_ada_value_supplied = total_token_supplied * token_price
     total_ada_value_borrowed = total_token_borrowed * token_price
 
+    market_dict[ "total_ada_value_supplied" ] = total_ada_value_supplied
+    market_dict[ "total_ada_value_borrowed" ] = total_ada_value_borrowed
+
     total_market_revenue_daily = total_token_borrowed * borrow_daily_apr
     total_market_revenue_ada_value_daily = total_ada_value_borrowed * borrow_daily_apr
 
@@ -818,6 +825,7 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     
     market_dict[ "stake_revenue_daily" ] = stake_revenue_daily
 
+    market_dict[ "user_ada_value_supplied" ] = user_ada_value_supplied
     market_dict[ "user_ada_value_supplied_int_gen" ] = user_ada_value_supplied * supply_daily_apr
     market_dict[ "user_ada_value_borrowed_int_gen" ] = user_ada_value_borrowed * borrow_daily_apr
 
