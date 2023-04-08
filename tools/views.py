@@ -531,15 +531,23 @@ def calculate_lq_optimal_rewards( markets_list, user_staked_lq_proprotion ):
     combined_only_user_ada_value_supplied_int_gen = 0
     combined_fold_user_ada_value_supplied_int_gen = 0
     combined_fold_user_ada_value_borrowed_int_gen = 0
+    combined_only_user_ada_value_supplied = 0
+    combined_fold_user_ada_value_supplied = 0
+    combined_only_total_ada_value_supplied = 0
+    combined_fold_total_ada_value_supplied = 0
 
     for market in markets_list:
         combined_total_market_revenue_ada_value_daily += market[ "total_market_revenue_ada_value_daily" ]
         combined_only_user_ada_value_supplied_int_gen += market[ "only_user_ada_value_supplied_int_gen" ]
         combined_fold_user_ada_value_supplied_int_gen += market[ "fold_user_ada_value_supplied_int_gen" ]
         combined_fold_user_ada_value_borrowed_int_gen += market[ "fold_user_ada_value_borrowed_int_gen" ]
+        combined_only_user_ada_value_supplied += market[ "only_user_ada_value_supplied" ]
+        combined_fold_user_ada_value_supplied += market[ "fold_user_ada_value_supplied" ]
+        combined_only_total_ada_value_supplied += market[ "only_total_ada_value_supplied" ]
+        combined_fold_total_ada_value_supplied += market[ "fold_total_ada_value_supplied" ]
 
-    only_supply_proportion = combined_only_user_ada_value_supplied_int_gen / combined_total_market_revenue_ada_value_daily
-    fold_supply_proportion = combined_fold_user_ada_value_supplied_int_gen / combined_total_market_revenue_ada_value_daily
+    only_supply_proportion = combined_only_user_ada_value_supplied / combined_only_total_ada_value_supplied
+    fold_supply_proportion = combined_fold_user_ada_value_supplied / combined_fold_total_ada_value_supplied
     fold_borrow_proportion = combined_fold_user_ada_value_borrowed_int_gen / combined_total_market_revenue_ada_value_daily
 
     only_lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * only_supply_proportion
@@ -677,6 +685,10 @@ def get_market_optimal_data( user_token_supply, market, stake_apy, ltv_ratio, fo
 
     total_ada_value_supplied = total_token_supplied * token_price
     total_ada_value_borrowed = total_token_borrowed * token_price
+
+    market_dict[ "only_total_ada_value_supplied" ] = total_ada_value_supplied
+    market_dict[ "fold_total_ada_value_supplied" ] = total_ada_value_supplied
+    market_dict[ "fold_total_ada_value_borrowed" ] = total_ada_value_borrowed
 
     total_market_revenue_daily = total_token_borrowed * borrow_daily_apr
     total_market_revenue_ada_value_daily = total_ada_value_borrowed * borrow_daily_apr
