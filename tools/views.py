@@ -685,11 +685,11 @@ def get_market_optimal_data( user_token_supply, market, stake_apy, ltv_ratio, fo
     fold_user_ada_value_borrowed = fold_user_token_borrow * token_price
 
     market_dict[ "only_user_ada_value_supplied" ] = only_user_ada_value_supplied
-    market_dict[ "fold_user_ada_value_supplied" ] = fold_user_token_supply
-    market_dict[ "fold_user_ada_value_borrowed" ] = fold_user_token_borrow
+    market_dict[ "fold_user_ada_value_supplied" ] = fold_user_ada_value_supplied
+    market_dict[ "fold_user_ada_value_borrowed" ] = fold_user_ada_value_borrowed
 
-    only_stake_revenue_daily = stake_daily_apr * only_user_token_supply
-    fold_stake_revenue_daily = stake_daily_apr * fold_user_token_supply
+    only_stake_revenue_daily = stake_daily_apr * only_user_token_supply * ( 1 - utilization )
+    fold_stake_revenue_daily = stake_daily_apr * fold_user_token_supply * ( 1 - utilization )
     
     market_dict[ "only_stake_revenue_daily" ] = only_stake_revenue_daily
     market_dict[ "fold_stake_revenue_daily" ] = fold_stake_revenue_daily
@@ -811,10 +811,10 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     user_ada_value_supplied = user_token_supply * token_price
     user_ada_value_borrowed = user_token_borrow * token_price
 
-    market_dict[ "user_ada_value_supplied" ] = user_token_supply
-    market_dict[ "user_ada_value_borrowed" ] = user_token_borrow
+    market_dict[ "user_ada_value_supplied" ] = user_ada_value_supplied
+    market_dict[ "user_ada_value_borrowed" ] = user_ada_value_borrowed
 
-    stake_revenue_daily = stake_daily_apr * user_token_supply
+    stake_revenue_daily = stake_daily_apr * user_token_supply * ( 1 - utilization )
     
     market_dict[ "stake_revenue_daily" ] = stake_revenue_daily
 
