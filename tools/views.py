@@ -521,15 +521,15 @@ def get_token_price( policyassetID ):
 def calculate_lq_optimal_rewards( markets_list, user_staked_lq_proprotion ):
     lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
 
-    lq_reward_dist_supply_ratio = 0.5
+    lq_reward_dist_supply_ratio = 1
     lq_reward_dist_reduction = 1
 
     lq_reward_dist_supply_yearly = 2493750 * lq_reward_dist_supply_ratio * lq_reward_dist_reduction
     lq_reward_dist_borrow_yearly = 2493750 * ( 1 - lq_reward_dist_supply_ratio ) * lq_reward_dist_reduction
 
     combined_total_market_revenue_ada_value_daily = 0
-    combined_only_user_ada_value_supplied_int_gen = 0
-    combined_fold_user_ada_value_supplied_int_gen = 0
+    #combined_only_user_ada_value_supplied_int_gen = 0
+    #combined_fold_user_ada_value_supplied_int_gen = 0
     combined_fold_user_ada_value_borrowed_int_gen = 0
     combined_only_user_ada_value_supplied = 0
     combined_fold_user_ada_value_supplied = 0
@@ -538,13 +538,13 @@ def calculate_lq_optimal_rewards( markets_list, user_staked_lq_proprotion ):
 
     for market in markets_list:
         combined_total_market_revenue_ada_value_daily += market[ "total_market_revenue_ada_value_daily" ]
-        combined_only_user_ada_value_supplied_int_gen += market[ "only_user_ada_value_supplied_int_gen" ]
-        combined_fold_user_ada_value_supplied_int_gen += market[ "fold_user_ada_value_supplied_int_gen" ]
+        combined_only_total_ada_value_supplied += market[ "only_total_ada_value_supplied" ]
+        combined_fold_total_ada_value_supplied += market[ "fold_total_ada_value_supplied" ]
+        #combined_only_user_ada_value_supplied_int_gen += market[ "only_user_ada_value_supplied_int_gen" ]
+        #combined_fold_user_ada_value_supplied_int_gen += market[ "fold_user_ada_value_supplied_int_gen" ]
         combined_fold_user_ada_value_borrowed_int_gen += market[ "fold_user_ada_value_borrowed_int_gen" ]
         combined_only_user_ada_value_supplied += market[ "only_user_ada_value_supplied" ]
         combined_fold_user_ada_value_supplied += market[ "fold_user_ada_value_supplied" ]
-        combined_only_total_ada_value_supplied += market[ "only_total_ada_value_supplied" ]
-        combined_fold_total_ada_value_supplied += market[ "fold_total_ada_value_supplied" ]
 
     only_supply_proportion = combined_only_user_ada_value_supplied / combined_only_total_ada_value_supplied
     fold_supply_proportion = combined_fold_user_ada_value_supplied / combined_fold_total_ada_value_supplied
@@ -577,24 +577,29 @@ def calculate_lq_optimal_rewards( markets_list, user_staked_lq_proprotion ):
 def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
     lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
 
-    lq_reward_dist_supply_ratio = 0.5
+    lq_reward_dist_supply_ratio = 1
     lq_reward_dist_reduction = 1
 
     lq_reward_dist_supply_yearly = 2493750 * lq_reward_dist_supply_ratio * lq_reward_dist_reduction
     lq_reward_dist_borrow_yearly = 2493750 * ( 1 - lq_reward_dist_supply_ratio ) * lq_reward_dist_reduction
 
     combined_total_market_revenue_ada_value_daily = 0
-    combined_user_ada_value_supplied_int_gen = 0
+    #combined_user_ada_value_supplied_int_gen = 0
     combined_user_ada_value_borrowed_int_gen = 0
     combined_user_ada_value_supplied = 0
     combined_total_ada_value_supplied = 0
 
     for market in markets_list:
         combined_total_market_revenue_ada_value_daily += market[ "total_market_revenue_ada_value_daily" ]
-        combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
-        combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
-        combined_user_ada_value_supplied += market[ "user_ada_value_supplied" ]
         combined_total_ada_value_supplied += market[ "total_ada_value_supplied" ]
+        #combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
+        if ( market[ "user_ada_value_borrowed_int_gen" ] ) > 0 and ( market[ "user_ada_value_supplied" ] > 0 ):
+            combined_user_ada_value_borrowed_int_gen += 0
+            combined_user_ada_value_supplied += 0
+        else:
+            combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
+            combined_user_ada_value_supplied += market[ "user_ada_value_supplied" ]
+        
 
     supply_proportion = combined_user_ada_value_supplied / combined_total_ada_value_supplied
     borrow_proportion = combined_user_ada_value_borrowed_int_gen / combined_total_market_revenue_ada_value_daily
@@ -620,12 +625,12 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
     return lq_rewards_dict
 
 def get_lq_staking_details( params_total_ada_value, staking_address ):
+
     lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
     
     user_staked_lq = params_total_ada_value / lq_price
     staked_lq_address = api.address( staking_address, return_type='json' )
-    #add user's possible amount to total
-    total_staked_lq = user_staked_lq
+    total_staked_lq = 0
     
     for a in staked_lq_address[ "amount" ]:
         if a[ "unit" ] == "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" :
@@ -750,7 +755,7 @@ def get_liqwid_optimal_data( params_list ):
     for market in liqwid_markets_data:
         
         user_token_supply = params_list[ param_counter ]
-        market_data_dict = get_market_optimal_data( user_token_supply, market, 0.0305, 0.7, 7, lq_staking_details[ "user_staked_lq_proportion" ] )
+        market_data_dict = get_market_optimal_data( user_token_supply, market, 0.0305, 0.4, 2, lq_staking_details[ "user_staked_lq_proportion" ] )
         param_counter += 1
 
         markets_list.append( market_data_dict )
