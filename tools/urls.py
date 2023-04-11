@@ -17,6 +17,6 @@ urlpatterns = [
     path('faq/', views.faq, name='faq'),
 
     path('liqwid/', views.liqwid_current, name='liqwid-current'),
-    path('liqwid-optimal/', views.liqwid_optimal, name='liqwid-optimal'),
+    path('liqwid-optimal/', views.liqwid_current, name='liqwid-optimal'),
     path('liqwid-current/', views.liqwid_current, name='liqwid-current'),
 ]

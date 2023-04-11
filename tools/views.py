@@ -583,32 +583,34 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
     lq_reward_dist_supply_yearly = 2493750 * lq_reward_dist_supply_ratio * lq_reward_dist_reduction
     lq_reward_dist_borrow_yearly = 2493750 * ( 1 - lq_reward_dist_supply_ratio ) * lq_reward_dist_reduction
 
-    combined_total_market_revenue_ada_value_daily = 0
-    #combined_user_ada_value_supplied_int_gen = 0
+    combined_total_market_borrow_interest_ada_value_daily = 0
+    combined_total_market_supply_interest_ada_value_daily = 0
+    combined_user_ada_value_supplied_int_gen = 0
     combined_user_ada_value_borrowed_int_gen = 0
-    combined_user_ada_value_supplied = 0
-    combined_total_ada_value_supplied = 0
+    #combined_user_ada_value_supplied = 0
+    #combined_total_ada_value_supplied = 0
 
     for market in markets_list:
-        combined_total_market_revenue_ada_value_daily += market[ "total_market_revenue_ada_value_daily" ]
-        combined_total_ada_value_supplied += market[ "total_ada_value_supplied" ]
-        #combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
-        if ( market[ "user_ada_value_borrowed_int_gen" ] ) > 0 and ( market[ "user_ada_value_supplied" ] > 0 ):
+        combined_total_market_borrow_interest_ada_value_daily += market[ "total_market_borrow_interest_ada_value_daily" ]
+        combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
+        if ( market[ "user_ada_value_borrowed_int_gen" ] ) > 0 and ( market[ "user_ada_value_supplied_int_gen" ] > 0 ):
             combined_user_ada_value_borrowed_int_gen += 0
-            combined_user_ada_value_supplied += 0
+            combined_user_ada_value_supplied_int_gen += 0
+        elif ( market[ "market_id" ] == "Djed" ):
+            combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
+            combined_user_ada_value_supplied_int_gen += ( market[ "user_ada_value_supplied_int_gen" ] * 3 )
         else:
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
-            combined_user_ada_value_supplied += market[ "user_ada_value_supplied" ]
+            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
         
-
-    supply_proportion = combined_user_ada_value_supplied / combined_total_ada_value_supplied
-    borrow_proportion = combined_user_ada_value_borrowed_int_gen / combined_total_market_revenue_ada_value_daily
+    supply_proportion = combined_user_ada_value_supplied_int_gen / combined_total_market_supply_interest_ada_value_daily
+    borrow_proportion = combined_user_ada_value_borrowed_int_gen / combined_total_market_borrow_interest_ada_value_daily
 
     lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * supply_proportion
     lq_reward_borrow_revenue_daily = ( lq_reward_dist_borrow_yearly / 365 ) * borrow_proportion
 
-    total_protocol_revenue_ada_value = combined_total_market_revenue_ada_value_daily * 0.1
-    user_protocol_revenue_ada_value = combined_total_market_revenue_ada_value_daily * 0.1 * user_staked_lq_proprotion
+    total_protocol_revenue_ada_value = combined_total_market_borrow_interest_ada_value_daily * 0.1
+    user_protocol_revenue_ada_value = combined_total_market_borrow_interest_ada_value_daily * 0.1 * user_staked_lq_proprotion
 
     lq_reward_supply_revenue_daily_ada_value = ( ( lq_reward_dist_supply_yearly / 365 ) * lq_price ) * supply_proportion
     lq_reward_borrow_revenue_daily_ada_value = ( ( lq_reward_dist_borrow_yearly / 365 ) * lq_price ) * borrow_proportion
@@ -826,11 +828,13 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     market_dict[ "total_ada_value_supplied" ] = total_ada_value_supplied
     market_dict[ "total_ada_value_borrowed" ] = total_ada_value_borrowed
 
-    total_market_revenue_daily = total_token_borrowed * borrow_daily_apr
-    total_market_revenue_ada_value_daily = total_ada_value_borrowed * borrow_daily_apr
+    total_market_supply_interest_daily = total_token_borrowed * supply_daily_apr
+    total_market_borrow_interest_daily = total_token_borrowed * borrow_daily_apr
+    total_market_supply_interest_ada_value_daily = total_ada_value_borrowed * supply_daily_apr
+    total_market_borrow_interest_ada_value_daily = total_ada_value_borrowed * borrow_daily_apr
 
-    market_dict[ "total_market_revenue_daily" ] = total_market_revenue_daily * revenue_share_percentage
-    market_dict[ "user_market_revenue_daily" ] = total_market_revenue_daily * 0.1 * user_staked_lq_proportion
+    market_dict[ "total_market_revenue_daily" ] = total_market_borrow_interest_daily * revenue_share_percentage
+    market_dict[ "user_market_revenue_daily" ] = total_market_borrow_interest_daily * 0.1 * user_staked_lq_proportion
 
     user_ada_value_supplied = user_token_supply * token_price
     user_ada_value_borrowed = user_token_borrow * token_price
@@ -842,11 +846,11 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     
     market_dict[ "stake_revenue_daily" ] = stake_revenue_daily
 
-    market_dict[ "user_ada_value_supplied" ] = user_ada_value_supplied
+    #market_dict[ "user_ada_value_supplied" ] = user_ada_value_supplied
     market_dict[ "user_ada_value_supplied_int_gen" ] = user_ada_value_supplied * supply_daily_apr
     market_dict[ "user_ada_value_borrowed_int_gen" ] = user_ada_value_borrowed * borrow_daily_apr
-
-    market_dict[ "total_market_revenue_ada_value_daily" ] = total_market_revenue_ada_value_daily
+    market_dict[ "total_market_supply_interest_ada_value_daily" ] = total_market_supply_interest_ada_value_daily
+    market_dict[ "total_market_borrow_interest_ada_value_daily" ] = total_market_borrow_interest_ada_value_daily
 
     return market_dict
 
