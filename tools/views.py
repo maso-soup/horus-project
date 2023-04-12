@@ -596,7 +596,7 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
         if ( market[ "user_ada_value_borrowed_int_gen" ] ) > 0 and ( market[ "user_ada_value_supplied_int_gen" ] > 0 ):
             combined_user_ada_value_borrowed_int_gen += 0
             combined_user_ada_value_supplied_int_gen += 0
-        elif ( market[ "market_id" ] == "Djed" ):
+        elif ( market[ "market_id" ] == "DJED" ):
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
             combined_user_ada_value_supplied_int_gen += ( market[ "user_ada_value_supplied_int_gen" ] * 3 )
         else:
