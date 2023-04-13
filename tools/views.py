@@ -592,19 +592,22 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
 
     for market in markets_list:
         combined_total_market_borrow_interest_ada_value_daily += market[ "total_market_borrow_interest_ada_value_daily" ]
-        combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
         """ if ( market[ "user_ada_value_borrowed_int_gen" ] ) > 0 and ( market[ "user_ada_value_supplied_int_gen" ] > 0 ):
             #yes this is duplicate, leaving for in case I need it again
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
             combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ] """
         if ( market[ "market_id" ] == "DJED" ):
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
-            combined_user_ada_value_supplied_int_gen += ( market[ "user_ada_value_supplied_int_gen" ] * 3 )
+            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ] * 3
+            combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ] * 3
         else:
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
             combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
+            combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
         
     supply_proportion = combined_user_ada_value_supplied_int_gen / combined_total_market_supply_interest_ada_value_daily
+    print("Total ada value user supply interest: ", combined_user_ada_value_supplied_int_gen)
+    print("Total ada value total supply interest: ", combined_total_market_supply_interest_ada_value_daily)
     borrow_proportion = combined_user_ada_value_borrowed_int_gen / combined_total_market_borrow_interest_ada_value_daily
 
     lq_reward_supply_revenue_daily = ( lq_reward_dist_supply_yearly / 365 ) * supply_proportion
@@ -824,14 +827,16 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     market_dict[ "borrow_interest_daily" ] = -borrow_interest_daily
 
     total_ada_value_supplied = total_token_supplied * token_price
+    print("Total ada value supplied: ", total_ada_value_supplied)
     total_ada_value_borrowed = total_token_borrowed * token_price
+    print("Total ada value borrowed: ", total_ada_value_borrowed)
 
     market_dict[ "total_ada_value_supplied" ] = total_ada_value_supplied
     market_dict[ "total_ada_value_borrowed" ] = total_ada_value_borrowed
 
-    total_market_supply_interest_daily = total_token_borrowed * supply_daily_apr
+    total_market_supply_interest_daily = total_token_supplied * supply_daily_apr
     total_market_borrow_interest_daily = total_token_borrowed * borrow_daily_apr
-    total_market_supply_interest_ada_value_daily = total_ada_value_borrowed * supply_daily_apr
+    total_market_supply_interest_ada_value_daily = total_ada_value_supplied * supply_daily_apr
     total_market_borrow_interest_ada_value_daily = total_ada_value_borrowed * borrow_daily_apr
 
     market_dict[ "total_market_revenue_daily" ] = total_market_borrow_interest_daily * revenue_share_percentage
