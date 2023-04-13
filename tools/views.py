@@ -598,12 +598,12 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
             combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ] """
         if ( market[ "market_id" ] == "DJED" ):
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
-            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ] * 3
-            combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ] * 3
+            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ] * ( 3 / 5 )
+            combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ] * ( 3 / 5 )
         else:
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
-            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
-            combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
+            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ] * ( 1 / 5 )
+            combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ] * ( 1 / 5 )
         
     supply_proportion = combined_user_ada_value_supplied_int_gen / combined_total_market_supply_interest_ada_value_daily
     print("Total ada value user supply interest: ", combined_user_ada_value_supplied_int_gen)
@@ -803,6 +803,8 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
 
     market_id = market[ "marketId" ]
     market_dict[ "market_id" ] = market_id
+    print(market_id)
+    print("User token coming in: ", user_token_supply)
     
     if market_id == "Ada" :
         token_price = 1
@@ -815,6 +817,7 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     utilization = float( market[ "utilization" ] )
     token_liquidity = float ( market [ "totalSupply" ] ) / 1000000
     total_token_supplied = token_liquidity / ( 1 - utilization )
+    print("Total token supplied: ", total_token_supplied)
     total_token_borrowed = total_token_supplied * utilization
 
     borrow_daily_apr = ( ( 1 + float( market[ "borrowApy" ] ) ) ** ( 1/365 ) ) - 1
@@ -829,7 +832,6 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     total_ada_value_supplied = total_token_supplied * token_price
     print("Total ada value supplied: ", total_ada_value_supplied)
     total_ada_value_borrowed = total_token_borrowed * token_price
-    print("Total ada value borrowed: ", total_ada_value_borrowed)
 
     market_dict[ "total_ada_value_supplied" ] = total_ada_value_supplied
     market_dict[ "total_ada_value_borrowed" ] = total_ada_value_borrowed
@@ -843,6 +845,7 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     market_dict[ "user_market_revenue_daily" ] = total_market_borrow_interest_daily * 0.1 * user_staked_lq_proportion
 
     user_ada_value_supplied = user_token_supply * token_price
+    print("User ada value supplied: ", user_ada_value_supplied)
     user_ada_value_borrowed = user_token_borrow * token_price
 
     market_dict[ "user_ada_value_supplied" ] = user_ada_value_supplied
@@ -854,8 +857,11 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
 
     #market_dict[ "user_ada_value_supplied" ] = user_ada_value_supplied
     market_dict[ "user_ada_value_supplied_int_gen" ] = user_ada_value_supplied * supply_daily_apr
+    print("Supply daily apr: ", supply_daily_apr)
     market_dict[ "user_ada_value_borrowed_int_gen" ] = user_ada_value_borrowed * borrow_daily_apr
+    print("User interest supply generated ", market_dict[ "user_ada_value_supplied_int_gen" ])
     market_dict[ "total_market_supply_interest_ada_value_daily" ] = total_market_supply_interest_ada_value_daily
+    print("Total interest supply generated", market_dict[ "total_market_supply_interest_ada_value_daily" ])
     market_dict[ "total_market_borrow_interest_ada_value_daily" ] = total_market_borrow_interest_ada_value_daily
 
     return market_dict
@@ -874,6 +880,8 @@ def get_liqwid_current_data( params_list ):
 
     liqwid_api_data = response.json()
     liqwid_markets_data = liqwid_api_data[ "data" ][ "markets" ]
+
+    print("Params List OG: ", params_list)
 
     params_total_ada_value = params_list[0] * get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
     params_list.pop(0)
