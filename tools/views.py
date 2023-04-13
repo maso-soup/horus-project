@@ -594,8 +594,9 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
         combined_total_market_borrow_interest_ada_value_daily += market[ "total_market_borrow_interest_ada_value_daily" ]
         combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
         if ( market[ "user_ada_value_borrowed_int_gen" ] ) > 0 and ( market[ "user_ada_value_supplied_int_gen" ] > 0 ):
-            combined_user_ada_value_borrowed_int_gen += 0
-            combined_user_ada_value_supplied_int_gen += 0
+            #yes this is duplicate, leaving for in case I need it again
+            combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
+            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
         elif ( market[ "market_id" ] == "DJED" ):
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
             combined_user_ada_value_supplied_int_gen += ( market[ "user_ada_value_supplied_int_gen" ] * 3 )
