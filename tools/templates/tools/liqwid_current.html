@@ -3,7 +3,7 @@
 
 <p class="display-6 pb-3"> Estimate Current Liqwid Rewards</p>
 
-<form class="d-flex" method="POST" action="{% url 'liqwid-current'%}">
+<form class="d-flex" method="POST" action="{% url 'liqwid'%}">
     {% csrf_token %}
     <div class="markets mx-auto">
         <input class="form-control my-2" type="input" name="data" placeholder="Total LQ Staked" aria-label="Search">
