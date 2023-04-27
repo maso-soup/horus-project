@@ -30,13 +30,13 @@
                         </tbody>
                     {% endfor %}
                         <tbody>
-                            <th>Total (LQ)</th>
+                            <th>Rewards (LQ)</th>
                             <td>{{ lq_rewards.lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
                             <td>{{ lq_rewards.lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }}</td> 
                             <td>N/A</td>
                         </tbody>
                         <tbody>
-                            <th>Total (Ada)</th>
+                            <th>Rewards (Ada)</th>
                             <td>{{ lq_rewards.lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
                             <td>{{ lq_rewards.lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }}</td>
                             <td>N/A</td>
@@ -65,19 +65,20 @@
                         </tbody>
                     {% endfor %}
                     <tbody>
-                        <th>Total (LQ)</th>
+                        <th>Rewards (LQ)</th>
                         <td>{{ lq_rewards.lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
                         <td>{{ lq_rewards.lq_reward_borrow_revenue_daily |mul:7 | floatformat:2 | intcomma }}</td>
                         <td>N/A</td>
                     </tbody>
                     <tbody>
-                        <th>Total (Ada)</th>
+                        <th>Rewards (Ada)</th>
                         <td>{{ lq_rewards.lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td>
                         <td>{{ lq_rewards.lq_reward_borrow_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
                         <td>N/A</td>
                     </tbody>
                 </table>
             </div>
+            <p>LQ Reward APR: {{ lq_rewards.lq_rewards_total_apr | floatformat:2 | intcomma }}%</p>
         </div>
         <div class="col">
             <b>Monthly</b>
@@ -100,13 +101,13 @@
                         </tbody>
                     {% endfor %}
                         <tbody>
-                            <th>Total (LQ)</th>
+                            <th>Rewards (LQ)</th>
                             <td>{{ lq_rewards.lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
                             <td>{{ lq_rewards.lq_reward_borrow_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
                             <td>N/A</td>
                         </tbody>
                         <tbody>
-                            <th>Total (Ada)</th>
+                            <th>Rewards (Ada)</th>
                             <td>{{ lq_rewards.lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
                             <td>{{ lq_rewards.lq_reward_borrow_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
                             <td>N/A</td>
