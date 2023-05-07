@@ -535,9 +535,11 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
         combined_total_market_borrow_interest_ada_value_daily += market[ "total_market_borrow_interest_ada_value_daily" ]
         if ( market[ "market_id" ] == "DJED" ):
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
-            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ] * 3
-            combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ] * 3
+            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
+            combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
             combined_user_ada_value_supply += market[ "user_ada_value_supplied" ]
+            #combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ] * 3
+            #combined_user_ada_value_supply += market[ "user_ada_value_supplied" ] * 3
         else:
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
             combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
@@ -548,11 +550,11 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
     borrow_proportion = combined_user_ada_value_borrowed_int_gen / combined_total_market_borrow_interest_ada_value_daily
 
     #Old Linear release schedule
-    lq_reward_dist_supply_daily = ( 2493750 * lq_reward_dist_supply_ratio ) / 365
-    lq_reward_dist_borrow_daily = ( 2493750 * ( 1 - lq_reward_dist_supply_ratio ) ) / 365
+    #lq_reward_dist_supply_daily = ( 2493750 * lq_reward_dist_supply_ratio ) / 365
+    #lq_reward_dist_borrow_daily = ( 2493750 * ( 1 - lq_reward_dist_supply_ratio ) ) / 365
 
-    #lq_reward_dist_supply_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * lq_reward_dist_supply_ratio
-    #lq_reward_dist_borrow_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * ( 1 - lq_reward_dist_supply_ratio )
+    lq_reward_dist_supply_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * lq_reward_dist_supply_ratio * 2
+    lq_reward_dist_borrow_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * ( 1 - lq_reward_dist_supply_ratio ) * 2
 
     lq_reward_supply_revenue_daily = lq_reward_dist_supply_daily * supply_proportion
     lq_reward_borrow_revenue_daily = lq_reward_dist_borrow_daily * borrow_proportion
