@@ -565,7 +565,10 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
     lq_reward_supply_revenue_daily_ada_value = ( lq_reward_dist_supply_daily * lq_price ) * supply_proportion
     lq_reward_borrow_revenue_daily_ada_value = ( lq_reward_dist_borrow_daily * lq_price ) * borrow_proportion
 
-    lq_rewards_total_apr =  lq_reward_supply_revenue_daily_ada_value / combined_user_ada_value_supply * 100 * 365
+    lq_rewards_total_apr = 0
+
+    if combined_user_ada_value_supply > 0:
+        lq_rewards_total_apr =  lq_reward_supply_revenue_daily_ada_value / combined_user_ada_value_supply * 100 * 365
 
     lq_rewards_dict = {
         "lq_reward_supply_revenue_daily" : lq_reward_supply_revenue_daily,
