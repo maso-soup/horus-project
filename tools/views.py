@@ -505,7 +505,7 @@ def faq( request ):
     return render( request, 'tools/faq.html' )
 
 def get_token_price( policyassetID ):
-    response = requests.get( MINSWAP_API_URL )
+    response = requests.get( MINSWAP_API_URL, timeout=5 )
 
     if policyassetID == "lovelace":
         return 1
@@ -553,8 +553,11 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
     #lq_reward_dist_supply_daily = ( 2493750 * lq_reward_dist_supply_ratio ) / 365
     #lq_reward_dist_borrow_daily = ( 2493750 * ( 1 - lq_reward_dist_supply_ratio ) ) / 365
 
-    lq_reward_dist_supply_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * lq_reward_dist_supply_ratio * 2
-    lq_reward_dist_borrow_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * ( 1 - lq_reward_dist_supply_ratio ) * 2
+    lq_reward_dist_supply_daily = ( 80000 / 30 ) * ( lq_reward_dist_supply_ratio )
+    lq_reward_dist_borrow_daily = ( 80000 / 30 ) * ( 1 - lq_reward_dist_supply_ratio )
+
+    #lq_reward_dist_supply_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * lq_reward_dist_supply_ratio * 2
+    #lq_reward_dist_borrow_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * ( 1 - lq_reward_dist_supply_ratio ) * 2
 
     lq_reward_supply_revenue_daily = lq_reward_dist_supply_daily * supply_proportion
     lq_reward_borrow_revenue_daily = lq_reward_dist_borrow_daily * borrow_proportion
@@ -674,13 +677,15 @@ def get_liqwid_current_data( params_list ):
         "variables": {},
         "query": "query GetMarkets {\n  markets {\n    ...MarketFragment\n    __typename\n  }\n}\n\nfragment MarketFragment on Market {\n  asset {\n    symbol\n    icon\n    marketId\n    name\n    __typename\n  }\n  decimals\n  market {\n    ...MarketInfoFragment\n    __typename\n  }\n  marketParams {\n    ...MarketParamsDatumFragment\n    __typename\n  }\n  marketId\n  maxLoanToValue\n  borrowApy\n  supplyApy\n  totalSupply\n  supplyLqDistributionApy\n  borrowLqDistributionApy\n  exchangeRate\n  qTokenId\n  qTokenPolicyId\n  minValue\n  compoundsInAYear\n  utilization\n  __typename\n}\n\nfragment MarketInfoFragment on MarketInfo {\n  params {\n    multiSigStSymbol\n    marketId\n    oracleTokenClass {\n      ...AssetClassFragment\n      __typename\n    }\n    underlyingClass {\n      ...FixedTokenFragment\n      __typename\n    }\n    uniqRef {\n      ...UniqueRefFragment\n      __typename\n    }\n    __typename\n  }\n  scripts {\n    action {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    actionToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    batch {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    batchFinal {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    batchToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    borrowToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    collateralParamsToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    liquidation {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    loan {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    marketParamsToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    marketState {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    marketStateToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    qToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment AssetClassFragment on AssetClass {\n  name\n  symbol\n  __typename\n}\n\nfragment FixedTokenFragment on FixedToken {\n  value0 {\n    ...AssetClassFragment\n    __typename\n  }\n  __typename\n}\n\nfragment UniqueRefFragment on UniqueRef {\n  index\n  transactionId\n  __typename\n}\n\nfragment ScriptPlutusV2Fragment on ScriptPlutusV2 {\n  script {\n    value0\n    value1 {\n      _empty\n      __typename\n    }\n    __typename\n  }\n  hash\n  __typename\n}\n\nfragment ScriptMintingPolicyFragment on ScriptMintingPolicy {\n  script {\n    value0 {\n      value0\n      value1 {\n        _empty\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  assetClass {\n    ...AssetClassFragment\n    __typename\n  }\n  __typename\n}\n\nfragment MarketParamsDatumFragment on MarketParamsDatum {\n  actionDistribution\n  actionHash\n  actionStakeCredentials\n  batchHash\n  closeFactor0\n  closeFactor1\n  compoundRate\n  dividendsDatum {\n    value0 {\n      value0\n      __typename\n    }\n    __typename\n  }\n  dividendsValidatorHash\n  incomeRatio {\n    treasury\n    suppliers\n    reserve\n    dividends\n    __typename\n  }\n  initialQTokenRate\n  interestModel {\n    baseRate\n    utilMultiplier\n    utilMultiplierJump\n    kink\n    __typename\n  }\n  liquidationThreshold0\n  liquidationThreshold1\n  loanValidatorHash\n  maxBatchTime\n  maxCollateralAssets\n  maxLTV\n  maxLoan\n  maxTimeWidth\n  minBatchSize\n  minBatchTime\n  minValue\n  numActions\n  treasuryDatum {\n    value0 {\n      value0\n      __typename\n    }\n    __typename\n  }\n  treasuryValidatorHash\n  __typename\n}"
     }
-    response = requests.post( LIQWID_API_URL, json=post_payload )
+    response = requests.post( LIQWID_API_URL, json=post_payload, timeout=5 )
 
     if response.status_code != 200 :
         return "Liqwid API error"
 
     liqwid_api_data = response.json()
     liqwid_markets_data = liqwid_api_data[ "data" ][ "markets" ]
+
+    print("Params list ", params_list[0])
 
     params_total_ada_value = params_list[0] * get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
     params_list.pop(0)
@@ -725,7 +730,11 @@ def liqwid_current( request ):
         except ValueError :
             return render( request, 'tools/liqwid_current.html' )
 
-        liqwid_data = get_liqwid_current_data( data_list )
+        try:
+            liqwid_data = get_liqwid_current_data( data_list )
+        
+        except requests.exceptions.ReadTimeout:
+            return render( request, 'tools/liqwid_current.html' )
 
         return render( request, 'tools/liqwid_current_results.html', context=liqwid_data )
 
