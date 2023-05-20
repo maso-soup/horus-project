@@ -522,15 +522,24 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
     lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
 
     lq_reward_dist_supply_ratio = 1
-    min_lq_rewards = 50000
-    min_lq_rewards = 100000
     min_lq_rewards_per_market = 500
+    num_markets = 3
+    num_stable_markets = 1
+    min_lq_rewards = 50000 / 30
+    max_lq_rewards = 100000 / 30
+    adjusted_min_lq_rewards = min_lq_rewards - ( ( min_lq_rewards_per_market / 30 ) * num_markets )
+    adjusted_max_lq_rewards = max_lq_rewards - ( ( min_lq_rewards_per_market / 30 ) * num_markets )
+    target_stablecoin_apr = 0.5
 
     combined_total_market_borrow_interest_ada_value_daily = 0
     combined_total_market_supply_interest_ada_value_daily = 0
     combined_user_ada_value_supplied_int_gen = 0
     combined_user_ada_value_borrowed_int_gen = 0
     combined_user_ada_value_supply = 0
+
+    combined_stablecoin_supply_ada_value = 0
+    combined_stablecoin_borrow_interest_ada_value = 0
+
     #combined_user_ada_value_supplied = 0
     #combined_total_ada_value_supplied = 0
 
@@ -541,26 +550,61 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
             combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
             combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
             combined_user_ada_value_supply += market[ "user_ada_value_supplied" ]
-            #combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ] * 3
-            #combined_user_ada_value_supply += market[ "user_ada_value_supplied" ] * 3
-        else:
+
+            combined_stablecoin_supply_ada_value += market[ "total_ada_value_supplied" ]
+            combined_stablecoin_borrow_interest_ada_value += market[ "total_market_borrow_interest_ada_value_daily" ]
+
+        elif market[ "market_id" ] == "SHEN" :
             combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
             combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
             combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
             combined_user_ada_value_supply += market[ "user_ada_value_supplied" ]
+
+            shen_borrow_interest_ada_value = market[ "total_market_borrow_interest_ada_value_daily" ]
+
+        elif market[ "market_id" ] == "Ada" :
+            combined_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
+            combined_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
+            combined_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
+            combined_user_ada_value_supply += market[ "user_ada_value_supplied" ]
+
+            ada_borrow_interest_ada_value = market[ "total_market_borrow_interest_ada_value_daily" ]
+
+    stable_rewards_stable_value_daily = combined_stablecoin_supply_ada_value * ( target_stablecoin_apr / 365 )
+    stable_rewards_lq_value_daily = stable_rewards_stable_value_daily / lq_price
+    print(f"Total stable LQ rewards daily: {stable_rewards_lq_value_daily}" )
+    total_rewards_lq_value_daily = stable_rewards_lq_value_daily / ( combined_stablecoin_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily )
+    
+    variable_total_rewards_lq_value_daily = total_rewards_lq_value_daily - ( ( min_lq_rewards_per_market / 30 ) * num_markets )
+
+    print(f"Total LQ rewards daily: {total_rewards_lq_value_daily}" )
+
+    scaling_factor = 1
+
+    if variable_total_rewards_lq_value_daily > adjusted_max_lq_rewards :
+        scaling_factor = adjusted_max_lq_rewards / variable_total_rewards_lq_value_daily
+    
+    elif variable_total_rewards_lq_value_daily < adjusted_min_lq_rewards:
+        scaling_factor = adjusted_min_lq_rewards / variable_total_rewards_lq_value_daily
+
+    lq_reward_dist_stable_supply_daily = ( ( variable_total_rewards_lq_value_daily * ( combined_stablecoin_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily ) * scaling_factor ) + ( ( min_lq_rewards_per_market / 30 ) * num_stable_markets ) ) * lq_reward_dist_supply_ratio
+    lq_reward_dist_stable_borrow_daily = ( ( variable_total_rewards_lq_value_daily * ( combined_stablecoin_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily ) * scaling_factor ) + ( ( min_lq_rewards_per_market / 30 ) * num_stable_markets ) ) * ( 1 - lq_reward_dist_supply_ratio )
+
+    lq_reward_dist_shen_supply_daily = ( ( variable_total_rewards_lq_value_daily * ( shen_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily ) * scaling_factor ) + ( min_lq_rewards_per_market / 30 ) ) * lq_reward_dist_supply_ratio
+    lq_reward_dist_shen_borrow_daily = ( ( variable_total_rewards_lq_value_daily * ( shen_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily )  * scaling_factor ) + ( min_lq_rewards_per_market / 30 ) ) * ( 1 - lq_reward_dist_supply_ratio )
+
+    lq_reward_dist_ada_supply_daily = ( ( variable_total_rewards_lq_value_daily * ( ada_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily ) * scaling_factor ) + ( min_lq_rewards_per_market / 30 ) ) * lq_reward_dist_supply_ratio
+    lq_reward_dist_ada_borrow_daily = ( ( variable_total_rewards_lq_value_daily * ( ada_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily ) * scaling_factor ) + ( min_lq_rewards_per_market / 30 ) ) * ( 1 - lq_reward_dist_supply_ratio )
+
+    print(f"Stable LQ rewards daily: {lq_reward_dist_stable_supply_daily}" )
+    print(f"Shen LQ rewards daily: {lq_reward_dist_shen_supply_daily}" )
+    print(f"Ada LQ rewards daily: {lq_reward_dist_ada_supply_daily}" )
         
     supply_proportion = combined_user_ada_value_supplied_int_gen / combined_total_market_supply_interest_ada_value_daily
     borrow_proportion = combined_user_ada_value_borrowed_int_gen / combined_total_market_borrow_interest_ada_value_daily
 
-    #Old Linear release schedule
-    #lq_reward_dist_supply_daily = ( 2493750 * lq_reward_dist_supply_ratio ) / 365
-    #lq_reward_dist_borrow_daily = ( 2493750 * ( 1 - lq_reward_dist_supply_ratio ) ) / 365
-
-    #lq_reward_dist_supply_daily = ( 80000 / 30 ) * ( lq_reward_dist_supply_ratio )
-    #lq_reward_dist_borrow_daily = ( 80000 / 30 ) * ( 1 - lq_reward_dist_supply_ratio )
-
-    lq_reward_dist_supply_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * lq_reward_dist_supply_ratio * 2
-    lq_reward_dist_borrow_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * ( 1 - lq_reward_dist_supply_ratio ) * 2
+    #lq_reward_dist_supply_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * lq_reward_dist_supply_ratio * 2
+    #lq_reward_dist_borrow_daily = ( combined_total_market_borrow_interest_ada_value_daily / lq_price ) * ( 1 - lq_reward_dist_supply_ratio ) * 2
 
     lq_reward_supply_revenue_daily = lq_reward_dist_supply_daily * supply_proportion
     lq_reward_borrow_revenue_daily = lq_reward_dist_borrow_daily * borrow_proportion
