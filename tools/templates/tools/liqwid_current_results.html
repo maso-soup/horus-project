@@ -30,15 +30,39 @@
                         </tbody>
                     {% endfor %}
                         <tbody>
-                            <th>Rewards (LQ)</th>
-                            <td>{{ lq_rewards.lq_reward_supply_revenue_daily | floatformat:2 | intcomma  }}</td> 
-                            <td>{{ lq_rewards.lq_reward_borrow_revenue_daily | floatformat:2 | intcomma }}</td> 
+                            <th>Ada Rewards (LQ)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_ada_daily | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.lq_reward_borrow_ada_daily | floatformat:2 | intcomma }}</td> 
                             <td>N/A</td>
                         </tbody>
                         <tbody>
-                            <th>Rewards (Ada)</th>
-                            <td>{{ lq_rewards.lq_reward_supply_revenue_daily_ada_value | floatformat:2 | intcomma  }}</td>
-                            <td>{{ lq_rewards.lq_reward_borrow_revenue_daily_ada_value | floatformat:2 | intcomma }}</td>
+                            <th>Ada Rewards (Ada)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_ada_daily_ada_value | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.lq_reward_borrow_ada_daily_ada_value | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Stablecoin Rewards (LQ)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_stable_daily | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.lq_reward_borrow_stable_daily | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Stablecoin Rewards (Ada)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_stable_daily_ada_value | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.lq_reward_borrow_stable_daily_ada_value | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Shen Rewards (LQ)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_shen_daily | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.lq_reward_borrow_shen_daily | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Shen Rewards (Ada)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_shen_daily_ada_value | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.lq_reward_borrow_shen_daily_ada_value | floatformat:2 | intcomma }}</td>
                             <td>N/A</td>
                         </tbody>
                 </table>
@@ -64,18 +88,42 @@
                             <td>{{ market.stake_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td>
                         </tbody>
                     {% endfor %}
-                    <tbody>
-                        <th>Rewards (LQ)</th>
-                        <td>{{ lq_rewards.lq_reward_supply_revenue_daily |mul:7 | floatformat:2 | intcomma  }}</td> 
-                        <td>{{ lq_rewards.lq_reward_borrow_revenue_daily |mul:7 | floatformat:2 | intcomma }}</td>
-                        <td>N/A</td>
-                    </tbody>
-                    <tbody>
-                        <th>Rewards (Ada)</th>
-                        <td>{{ lq_rewards.lq_reward_supply_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma  }}</td>
-                        <td>{{ lq_rewards.lq_reward_borrow_revenue_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
-                        <td>N/A</td>
-                    </tbody>
+                        <tbody>
+                            <th>Ada Rewards (LQ)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_ada_daily |mul:7 | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.lq_reward_borrow_ada_daily |mul:7 | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Ada Rewards (Ada)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_ada_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.lq_reward_borrow_ada_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Stablecoin Rewards (LQ)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_stable_daily |mul:7 | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.lq_reward_borrow_stable_daily |mul:7 | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Stablecoin Rewards (Ada)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_stable_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.lq_reward_borrow_stable_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Shen Rewards (LQ)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_shen_daily |mul:7 | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.lq_reward_borrow_shen_daily |mul:7 | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Shen Rewards (Ada)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_shen_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.lq_reward_borrow_shen_daily_ada_value |mul:7 | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
                 </table>
             </div>
         </div>
@@ -100,22 +148,46 @@
                         </tbody>
                     {% endfor %}
                         <tbody>
-                            <th>Rewards (LQ)</th>
-                            <td>{{ lq_rewards.lq_reward_supply_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
-                            <td>{{ lq_rewards.lq_reward_borrow_revenue_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <th>Ada Rewards (LQ)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_ada_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.lq_reward_borrow_ada_daily |mul:30 | floatformat:2 | intcomma }}</td> 
                             <td>N/A</td>
                         </tbody>
                         <tbody>
-                            <th>Rewards (Ada)</th>
-                            <td>{{ lq_rewards.lq_reward_supply_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
-                            <td>{{ lq_rewards.lq_reward_borrow_revenue_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <th>Ada Rewards (Ada)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_ada_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.lq_reward_borrow_ada_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Stablecoin Rewards (LQ)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_stable_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.lq_reward_borrow_stable_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Stablecoin Rewards (Ada)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_stable_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.lq_reward_borrow_stable_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Shen Rewards (LQ)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_shen_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <td>{{ lq_rewards.lq_reward_borrow_shen_daily |mul:30 | floatformat:2 | intcomma }}</td> 
+                            <td>N/A</td>
+                        </tbody>
+                        <tbody>
+                            <th>Shen Rewards (Ada)</th>
+                            <td>{{ lq_rewards.lq_reward_supply_shen_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
+                            <td>{{ lq_rewards.lq_reward_borrow_shen_daily_ada_value |mul:30 | floatformat:2 | intcomma }}</td>
                             <td>N/A</td>
                         </tbody>
                 </table>
             </div>
         </div>
     </div>
-    <p>LQ Reward APR: {{ lq_rewards.lq_rewards_total_apr | floatformat:2 | intcomma }}%</p>
+    <p>Total LQ Reward APR: {{ lq_rewards.lq_rewards_total_apr | floatformat:2 | intcomma }}%</p>
     <div class="row">
         <p><b>Revenue Share via LQ Staking</b></p>
         <div class="col">
