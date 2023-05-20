@@ -518,8 +518,7 @@ def get_token_price( policyassetID ):
     token_pair_info = response_json[ policyassetID + "_lovelace" ]
     return float( token_pair_info[ "last_price" ] )
 
-def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
-    lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
+def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion, lq_price ):
 
     lq_reward_dist_supply_ratio = 1
     min_lq_rewards = 50000
@@ -588,9 +587,7 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion ):
     
     return lq_rewards_dict
 
-def get_lq_staking_details( params_total_ada_value, staking_address ):
-
-    lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
+def get_lq_staking_details( params_total_ada_value, staking_address, lq_price ):
     
     user_staked_lq = params_total_ada_value / lq_price
     staked_lq_address = api.address( staking_address, return_type='json' )
@@ -690,10 +687,12 @@ def get_liqwid_current_data( params_list ):
 
     print("Params list ", params_list[0])
 
-    params_total_ada_value = params_list[0] * get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
+    lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
+
+    params_total_ada_value = params_list[0] * lq_price
     params_list.pop(0)
 
-    lq_staking_details = get_lq_staking_details( params_total_ada_value, "addr1w8arvq7j9qlrmt0wpdvpp7h4jr4fmfk8l653p9t907v2nsss7w7r4" )
+    lq_staking_details = get_lq_staking_details( params_total_ada_value, "addr1w8arvq7j9qlrmt0wpdvpp7h4jr4fmfk8l653p9t907v2nsss7w7r4", lq_price )
 
     markets_list = []
     param_counter = 0
@@ -709,12 +708,12 @@ def get_liqwid_current_data( params_list ):
 
         markets_list.append( market_data_dict )
 
-    lq_rewards = calculate_lq_current_rewards( markets_list, lq_staking_details[ "user_staked_lq_proportion" ] )
+    lq_rewards = calculate_lq_current_rewards( markets_list, lq_staking_details[ "user_staked_lq_proportion" ], lq_price )
 
     output_data = {
         "markets_list" : markets_list,
         "lq_rewards" : lq_rewards,
-        "lq_price" : lq_staking_details[ "lq_price" ],
+        "lq_price" : lq_price,
         "total_staked_lq" : lq_staking_details[ "total_staked_lq" ],
     }
 
