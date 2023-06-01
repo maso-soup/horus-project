@@ -1,7 +1,7 @@
 {% extends "tools/base.html" %}
 {% block search %}
 
-<p class="display-6 pb-3"> Estimate Current Liqwid Rewards</p>
+<p class="display-6 pb-3">Estimate Liqwid Rewards (currently under construction)</p>
 
 <form class="d-flex" method="POST" action="{% url 'liqwid'%}">
     {% csrf_token %}
@@ -13,10 +13,12 @@
         <input class="form-control my-2" type="input" name="data" placeholder="Total Djed Borrowed" aria-label="Search">
         <input class="form-control my-2" type="input" name="data" placeholder="Total Shen Supplied" aria-label="Search">
         <input class="form-control my-2" type="input" name="data" placeholder="Total Shen Borrowed" aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Total iUSD Supplied" aria-label="Search">
+        <input class="form-control my-2" type="input" name="data" placeholder="Total iUSD Borrowed" aria-label="Search">
         <button class="btn btn-outline-success" type="submit">Calculate</button>
     </div>
 </form>
 
-<p class="py-3">These calcutions attempt to provide a point-in-time estimate of the latest Liqwid Finance (LQ) reward methodology. This site is not officially affiliated with Liqwid Finance in any way. Please reachout if you suspect any errors. </p>
+<p class="py-3">(Currently iUSD/stable is innacurate, will fix in a few days) These calcutions attempt to provide a point-in-time estimate of the latest Liqwid Finance (LQ) reward methodology. This site is not officially affiliated with Liqwid Finance in any way. Please reachout if you suspect any errors. </p>
 
 {% endblock search %}

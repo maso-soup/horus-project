@@ -25,7 +25,7 @@ MINSWAP_API_URL = "https://api-mainnet-prod.minswap.org/coinmarketcap/v2/pairs"
 IPFS_API_URL = "https://ipfs.io/ipfs/"
 LIQWID_API_URL = "https://api.liqwiddev.net/graphql"
 
-LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME = {"Ada":"lovelace", "DJED":"8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd61446a65644d6963726f555344", "SHEN":"8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd615368656e4d6963726f555344"}
+LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME = {"Ada":"lovelace", "DJED":"8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd61446a65644d6963726f555344", "SHEN":"8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd615368656e4d6963726f555344", "IUSD":"f66d78b4a3cb3d37afa0ec36461e51ecbde00f26c8f0a68f94b6988069555344"}
 
 def validate_address( input_address ):
     '''Function for validating the user input address. Input not matching any
@@ -505,7 +505,7 @@ def faq( request ):
     return render( request, 'tools/faq.html' )
 
 def get_token_price( policyassetID ):
-    response = requests.get( MINSWAP_API_URL, timeout=5 )
+    response = requests.get( MINSWAP_API_URL, timeout=10 )
 
     if policyassetID == "lovelace":
         return 1
@@ -547,7 +547,7 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion, lq_pr
 
     for market in markets_list:
         combined_total_market_borrow_interest_ada_value_daily += market[ "total_market_borrow_interest_ada_value_daily" ]
-        if ( market[ "market_id" ] == "DJED" or market[ "market_id" ] == "iUSD" ):
+        if ( market[ "market_id" ] == "DJED" or market[ "market_id" ] == "IUSD" ):
             stable_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
             stable_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
             stable_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
@@ -576,6 +576,7 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion, lq_pr
     stable_rewards_stable_value_daily = combined_stablecoin_supply_ada_value * ( target_stablecoin_apr / 365 )
     stable_rewards_lq_value_daily = stable_rewards_stable_value_daily / lq_price
     print(f"Total stable LQ rewards daily: {stable_rewards_lq_value_daily}" )
+    print(f"Total stable value rewards daily: {stable_rewards_stable_value_daily}" )
     total_rewards_lq_value_daily = stable_rewards_lq_value_daily / ( combined_stablecoin_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily )
     
     variable_total_rewards_lq_value_daily = total_rewards_lq_value_daily - ( min_lq_rewards_per_market * num_markets )
@@ -586,6 +587,8 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion, lq_pr
 
     lq_reward_dist_stable_supply_daily = ( ( variable_total_rewards_lq_value_daily * ( combined_stablecoin_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily ) ) + ( min_lq_rewards_per_market * num_stable_markets ) ) * lq_reward_dist_supply_ratio
     lq_reward_dist_stable_borrow_daily = ( ( variable_total_rewards_lq_value_daily * ( combined_stablecoin_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily ) ) + ( min_lq_rewards_per_market * num_stable_markets ) ) * ( 1 - lq_reward_dist_supply_ratio )
+
+    print(f"Total stable dist supply rewards daily: {lq_reward_dist_stable_supply_daily}" )
 
     lq_reward_dist_shen_supply_daily = ( ( variable_total_rewards_lq_value_daily * ( shen_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily ) ) +  min_lq_rewards_per_market ) * lq_reward_dist_supply_ratio
     lq_reward_dist_shen_borrow_daily = ( ( variable_total_rewards_lq_value_daily * ( shen_borrow_interest_ada_value / combined_total_market_borrow_interest_ada_value_daily ) ) + min_lq_rewards_per_market ) * ( 1 - lq_reward_dist_supply_ratio )
@@ -621,6 +624,7 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion, lq_pr
     print(f"Adjusted Ada LQ rewards daily: {lq_reward_dist_ada_supply_daily}" )
         
     stable_supply_proportion = stable_user_ada_value_supplied_int_gen / stable_total_market_supply_interest_ada_value_daily
+    print(f"Stable supply proportion {stable_supply_proportion}")
     stable_borrow_proportion = stable_user_ada_value_borrowed_int_gen / combined_total_market_borrow_interest_ada_value_daily
 
     shen_supply_proportion = shen_user_ada_value_supplied_int_gen / shen_total_market_supply_interest_ada_value_daily
@@ -630,6 +634,7 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion, lq_pr
     ada_borrow_proportion = ada_user_ada_value_borrowed_int_gen / combined_total_market_borrow_interest_ada_value_daily
 
     lq_reward_supply_stable_daily = lq_reward_dist_stable_supply_daily * stable_supply_proportion
+    print(f"Supply stable daily lq rewards {lq_reward_supply_stable_daily}")
     lq_reward_borrow_stable_daily = lq_reward_dist_stable_borrow_daily * stable_borrow_proportion
 
     lq_reward_supply_shen_daily = lq_reward_dist_shen_supply_daily * shen_supply_proportion
@@ -711,6 +716,7 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
 
     else:
         token_price = get_token_price( LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME[ market_id ] )
+        print(f"{market_id} price is {token_price}")
         stake_daily_apr = 0
 
     utilization = float( market[ "utilization" ] )
