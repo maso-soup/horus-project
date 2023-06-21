@@ -504,19 +504,26 @@ def wallet( request, addr = None ):
 def faq( request ):
     return render( request, 'tools/faq.html' )
 
-def get_token_price( policyassetID ):
-    response = requests.get( MINSWAP_API_URL, timeout=10 )
+def get_token_price( market_id ):
+    market_prices_post_payload = {
+        "operationName":"GetStablePrice","variables":{"marketId":"Ada"},"query":"query GetStablePrice($marketId: String!) {\n  market(marketId: $marketId) {\n    ...MarketFragment\n    __typename\n  }\n  marketPrices {\n    ...AssetPriceFragment\n    __typename\n  }\n}\n\nfragment AssetClassFragment on AssetClass {\n  name\n  symbol\n  __typename\n}\n\nfragment FixedTokenFragment on FixedToken {\n  value0 {\n    ...AssetClassFragment\n    __typename\n  }\n  __typename\n}\n\nfragment UniqueRefFragment on UniqueRef {\n  index\n  transactionId\n  __typename\n}\n\nfragment ScriptPlutusV2Fragment on ScriptPlutusV2 {\n  script {\n    value0\n    value1 {\n      _empty\n      __typename\n    }\n    __typename\n  }\n  hash\n  __typename\n}\n\nfragment ScriptMintingPolicyFragment on ScriptMintingPolicy {\n  script {\n    value0 {\n      value0\n      value1 {\n        _empty\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  assetClass {\n    ...AssetClassFragment\n    __typename\n  }\n  __typename\n}\n\nfragment MarketInfoFragment on MarketInfo {\n  params {\n    multiSigStSymbol\n    marketId\n    oracleTokenClass {\n      ...AssetClassFragment\n      __typename\n    }\n    underlyingClass {\n      ...FixedTokenFragment\n      __typename\n    }\n    uniqRef {\n      ...UniqueRefFragment\n      __typename\n    }\n    __typename\n  }\n  scripts {\n    action {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    actionToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    batch {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    batchFinal {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    batchToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    borrowToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    collateralParamsToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    liquidation {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    loan {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    marketParamsToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    marketState {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    marketStateToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    qToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MarketParamsDatumFragment on MarketParamsDatum {\n  actionDistribution\n  actionHash\n  actionStakeCredentials\n  batchHash\n  closeFactor0\n  closeFactor1\n  compoundRate\n  dividendsDatum {\n    value0 {\n      value0\n      __typename\n    }\n    __typename\n  }\n  dividendsValidatorHash\n  incomeRatio {\n    treasury\n    suppliers\n    reserve\n    dividends\n    __typename\n  }\n  initialQTokenRate\n  interestModel {\n    baseRate\n    utilMultiplier\n    utilMultiplierJump\n    kink\n    __typename\n  }\n  liquidationThreshold0\n  liquidationThreshold1\n  loanValidatorHash\n  maxBatchTime\n  maxCollateralAssets\n  maxLTV\n  maxLoan\n  maxTimeWidth\n  minBatchSize\n  minBatchTime\n  minValue\n  numActions\n  treasuryDatum {\n    value0 {\n      value0\n      __typename\n    }\n    __typename\n  }\n  treasuryValidatorHash\n  __typename\n}\n\nfragment MarketFragment on Market {\n  asset {\n    symbol\n    icon\n    marketId\n    name\n    __typename\n  }\n  decimals\n  market {\n    ...MarketInfoFragment\n    __typename\n  }\n  marketParams {\n    ...MarketParamsDatumFragment\n    __typename\n  }\n  marketId\n  maxLoanToValue\n  borrowApy\n  supplyApy\n  totalSupply\n  supplyLqDistributionApy\n  borrowLqDistributionApy\n  exchangeRate\n  qTokenId\n  qTokenPolicyId\n  minValue\n  compoundsInAYear\n  utilization\n  __typename\n}\n\nfragment AssetPriceFragment on AssetPrice {\n  marketId\n  value\n  __typename\n}"
+    }
+    
+    market_prices_response = requests.post( LIQWID_API_URL, json=market_prices_post_payload, timeout=5 )
 
-    if policyassetID == "lovelace":
-        return 1
+    if market_prices_response.status_code != 200 :
+        return "Liqwid Market prices API error"
 
-    if response.status_code != 200 :
-        return "Minswap API Error"
+    liqwid_market_prices_api_data = market_prices_response.json()
+    liqwid_market_prices_data_list = liqwid_market_prices_api_data[ "data" ][ "marketPrices" ]
 
-    response_json = response.json()
+    token_price = 0
 
-    token_pair_info = response_json[ policyassetID + "_lovelace" ]
-    return float( token_pair_info[ "last_price" ] )
+    for dict in liqwid_market_prices_data_list:
+        if dict[ "marketId" ] == market_id :
+            token_price = dict[ "value" ] 
+
+    return float( token_price )
 
 def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion, lq_price ):
 
@@ -550,6 +557,7 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion, lq_pr
         if ( market[ "market_id" ] == "DJED" or market[ "market_id" ] == "IUSD" ):
             stable_user_ada_value_borrowed_int_gen += market[ "user_ada_value_borrowed_int_gen" ]
             stable_user_ada_value_supplied_int_gen += market[ "user_ada_value_supplied_int_gen" ]
+            print(f"Int gen first: {stable_user_ada_value_supplied_int_gen}")
             stable_total_market_supply_interest_ada_value_daily += market[ "total_market_supply_interest_ada_value_daily" ]
             combined_user_ada_value_supply += market[ "user_ada_value_supplied" ]
 
@@ -625,6 +633,8 @@ def calculate_lq_current_rewards( markets_list, user_staked_lq_proprotion, lq_pr
         
     stable_supply_proportion = stable_user_ada_value_supplied_int_gen / stable_total_market_supply_interest_ada_value_daily
     print(f"Stable supply proportion {stable_supply_proportion}")
+    print(f"Stable supply int gen {stable_user_ada_value_supplied_int_gen}")
+    print(f"Stable supply total int daily {stable_total_market_supply_interest_ada_value_daily}")
     stable_borrow_proportion = stable_user_ada_value_borrowed_int_gen / combined_total_market_borrow_interest_ada_value_daily
 
     shen_supply_proportion = shen_user_ada_value_supplied_int_gen / shen_total_market_supply_interest_ada_value_daily
@@ -715,7 +725,8 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
         stake_daily_apr = ( ( 1 + stake_apy ) ** ( 1/365 ) ) - 1
 
     else:
-        token_price = get_token_price( LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME[ market_id ] )
+        #token_price = get_token_price( LIQWID_FINANCE_ASSETS_POLICY_IDS_PLUS_ASSET_NAME[ market_id ] )
+        token_price = get_token_price( market_id )
         print(f"{market_id} price is {token_price}")
         stake_daily_apr = 0
 
@@ -749,6 +760,7 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
     market_dict[ "user_market_revenue_daily" ] = total_market_borrow_interest_daily * 0.1 * user_staked_lq_proportion
 
     user_ada_value_supplied = user_token_supply * token_price
+    print(f'user_ada_value_supplied user_token_supply {user_token_supply}')
     user_ada_value_borrowed = user_token_borrow * token_price
 
     market_dict[ "user_ada_value_supplied" ] = user_ada_value_supplied
@@ -768,22 +780,24 @@ def get_market_current_data( user_token_supply, user_token_borrow, market, stake
 
 def get_liqwid_current_data( params_list ):
 
-    post_payload = {
+    markets_post_payload = {
         "operationName": "GetMarkets",
         "variables": {},
         "query": "query GetMarkets {\n  markets {\n    ...MarketFragment\n    __typename\n  }\n}\n\nfragment MarketFragment on Market {\n  asset {\n    symbol\n    icon\n    marketId\n    name\n    __typename\n  }\n  decimals\n  market {\n    ...MarketInfoFragment\n    __typename\n  }\n  marketParams {\n    ...MarketParamsDatumFragment\n    __typename\n  }\n  marketId\n  maxLoanToValue\n  borrowApy\n  supplyApy\n  totalSupply\n  supplyLqDistributionApy\n  borrowLqDistributionApy\n  exchangeRate\n  qTokenId\n  qTokenPolicyId\n  minValue\n  compoundsInAYear\n  utilization\n  __typename\n}\n\nfragment MarketInfoFragment on MarketInfo {\n  params {\n    multiSigStSymbol\n    marketId\n    oracleTokenClass {\n      ...AssetClassFragment\n      __typename\n    }\n    underlyingClass {\n      ...FixedTokenFragment\n      __typename\n    }\n    uniqRef {\n      ...UniqueRefFragment\n      __typename\n    }\n    __typename\n  }\n  scripts {\n    action {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    actionToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    batch {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    batchFinal {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    batchToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    borrowToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    collateralParamsToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    liquidation {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    loan {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    marketParamsToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    marketState {\n      ...ScriptPlutusV2Fragment\n      __typename\n    }\n    marketStateToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    qToken {\n      ...ScriptMintingPolicyFragment\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment AssetClassFragment on AssetClass {\n  name\n  symbol\n  __typename\n}\n\nfragment FixedTokenFragment on FixedToken {\n  value0 {\n    ...AssetClassFragment\n    __typename\n  }\n  __typename\n}\n\nfragment UniqueRefFragment on UniqueRef {\n  index\n  transactionId\n  __typename\n}\n\nfragment ScriptPlutusV2Fragment on ScriptPlutusV2 {\n  script {\n    value0\n    value1 {\n      _empty\n      __typename\n    }\n    __typename\n  }\n  hash\n  __typename\n}\n\nfragment ScriptMintingPolicyFragment on ScriptMintingPolicy {\n  script {\n    value0 {\n      value0\n      value1 {\n        _empty\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  assetClass {\n    ...AssetClassFragment\n    __typename\n  }\n  __typename\n}\n\nfragment MarketParamsDatumFragment on MarketParamsDatum {\n  actionDistribution\n  actionHash\n  actionStakeCredentials\n  batchHash\n  closeFactor0\n  closeFactor1\n  compoundRate\n  dividendsDatum {\n    value0 {\n      value0\n      __typename\n    }\n    __typename\n  }\n  dividendsValidatorHash\n  incomeRatio {\n    treasury\n    suppliers\n    reserve\n    dividends\n    __typename\n  }\n  initialQTokenRate\n  interestModel {\n    baseRate\n    utilMultiplier\n    utilMultiplierJump\n    kink\n    __typename\n  }\n  liquidationThreshold0\n  liquidationThreshold1\n  loanValidatorHash\n  maxBatchTime\n  maxCollateralAssets\n  maxLTV\n  maxLoan\n  maxTimeWidth\n  minBatchSize\n  minBatchTime\n  minValue\n  numActions\n  treasuryDatum {\n    value0 {\n      value0\n      __typename\n    }\n    __typename\n  }\n  treasuryValidatorHash\n  __typename\n}"
     }
-    response = requests.post( LIQWID_API_URL, json=post_payload, timeout=5 )
+    markets_response = requests.post( LIQWID_API_URL, json=markets_post_payload, timeout=5 )
 
-    if response.status_code != 200 :
-        return "Liqwid API error"
+    if markets_response.status_code != 200 :
+        return "Liqwid Markets API error"
 
-    liqwid_api_data = response.json()
-    liqwid_markets_data = liqwid_api_data[ "data" ][ "markets" ]
+    liqwid_markets_api_data = markets_response.json()
+    liqwid_markets_data = liqwid_markets_api_data[ "data" ][ "markets" ]
 
     print("Params list ", params_list[0])
 
-    lq_price = get_token_price( "da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51" )
+    lq_price = get_token_price( "LQ" )
+
+    print(f'LQ price {lq_price}')
 
     params_total_ada_value = params_list[0] * lq_price
     params_list.pop(0)
@@ -794,6 +808,8 @@ def get_liqwid_current_data( params_list ):
     param_counter = 0
     user_token_supply = 0
     user_token_borrow = 0
+    
+    print(f'Params List 2 {params_list}')
 
     for market in liqwid_markets_data:
         
@@ -803,6 +819,8 @@ def get_liqwid_current_data( params_list ):
         param_counter += 2
 
         markets_list.append( market_data_dict )
+
+    print(f'Markets List {markets_list}')
 
     lq_rewards = calculate_lq_current_rewards( markets_list, lq_staking_details[ "user_staked_lq_proportion" ], lq_price )
 
