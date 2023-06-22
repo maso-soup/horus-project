@@ -791,7 +791,7 @@ def get_liqwid_current_data( params_list ):
         return "Liqwid Markets API error"
 
     liqwid_markets_api_data = markets_response.json()
-    liqwid_markets_data = liqwid_markets_api_data[ "data" ][ "markets" ]
+    liqwid_markets_data = sorted( liqwid_markets_api_data[ "data" ][ "markets" ], key= lambda x: x['marketId'] )
 
     print("Params list ", params_list[0])
 
